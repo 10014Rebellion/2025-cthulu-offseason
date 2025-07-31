@@ -36,7 +36,6 @@ import frc.robot.systems.intake.pivot.Pivot;
 import frc.robot.systems.intake.pivot.Pivot.PivotGoal;
 import frc.robot.systems.intake.rollers.Rollers;
 import frc.robot.systems.intake.rollers.Rollers.RollerGoal;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -57,7 +56,6 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
   private final CommandXboxController operatController = new CommandXboxController(1);
-
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -175,18 +173,30 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-
     // Intake Coral
     operatController
         .rightTrigger()
         .onTrue(
-            Commands.runOnce(() -> {pivot.setGoal(PivotGoal.INTAKE);}).alongWith
-            (Commands.runOnce(() -> {rollers.setGoal(RollerGoal.INTAKE);}))
-            .andThen(
-                Commands.runOnce(() -> {pivot.setGoal(PivotGoal.STOW);}).alongWith
-                (Commands.runOnce(() -> {rollers.setGoal(RollerGoal.HOLD);})))
-            .onlyWhile(hasGamepeiceTrigger)
-        );
+            Commands.runOnce(
+                    () -> {
+                      pivot.setGoal(PivotGoal.INTAKE);
+                    })
+                .alongWith(
+                    Commands.runOnce(
+                        () -> {
+                          rollers.setGoal(RollerGoal.INTAKE);
+                        }))
+                .andThen(
+                    Commands.runOnce(
+                            () -> {
+                              pivot.setGoal(PivotGoal.STOW);
+                            })
+                        .alongWith(
+                            Commands.runOnce(
+                                () -> {
+                                  rollers.setGoal(RollerGoal.HOLD);
+                                })))
+                .onlyWhile(hasGamepeiceTrigger));
   }
 
   /**
