@@ -1,14 +1,14 @@
 // REBELLION 10014
 
-package frc.robot.systems.shooter.indexer;
+package frc.robot.systems.shooter.flywheel;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-public class IndexerConstants {
+public class FlywheelConstants {
 
   public static int kSensorPort = 0;
-  public static int kLeftMotorPort = 32;
-  public static int kRightMotorPort = 33;
+  public static int kTopMotorPort = 32;
+  public static int kBottomMotorPort = 33;
 
   public static final IndexerHardware kIndexerHardware = new IndexerHardware(false, 2, IdleMode.kCoast, 60, 2);
 

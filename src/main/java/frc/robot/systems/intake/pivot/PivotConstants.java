@@ -4,7 +4,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class PivotConstants {
-  public static int kMotorPort = 0;
+  public static int kMotorPort = 41;
 
   public static Rotation2d kMaxPosistion = Rotation2d.fromRotations(0.0);
   public static Rotation2d kMinPosistion = Rotation2d.fromRotations(0.0);

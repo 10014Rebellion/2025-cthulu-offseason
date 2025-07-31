@@ -36,6 +36,8 @@ import frc.robot.systems.intake.pivot.Pivot;
 import frc.robot.systems.intake.pivot.Pivot.PivotGoal;
 import frc.robot.systems.intake.rollers.Rollers;
 import frc.robot.systems.intake.rollers.Rollers.RollerGoal;
+import frc.robot.systems.shooter.flywheel.Flywheel;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -50,6 +52,7 @@ public class RobotContainer {
   private final Pivot pivot;
   private final Rollers rollers;
   private final Arm arm;
+  private final Flywheel indexer;
 
   private final EventLoop teleopLoop = new EventLoop();
 
@@ -76,6 +79,7 @@ public class RobotContainer {
         arm = new Arm();
         rollers = new Rollers();
         pivot = new Pivot();
+        indexer = new Flywheel();
 
         break;
 
@@ -91,6 +95,7 @@ public class RobotContainer {
         arm = new Arm();
         rollers = new Rollers();
         pivot = new Pivot();
+        indexer = new Flywheel();
 
         break;
 
@@ -107,6 +112,7 @@ public class RobotContainer {
         arm = new Arm();
         rollers = new Rollers();
         pivot = new Pivot();
+        indexer = new Flywheel();
 
         break;
     }

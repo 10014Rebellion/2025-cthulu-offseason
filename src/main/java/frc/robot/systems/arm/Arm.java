@@ -78,7 +78,6 @@ public class Arm extends SubsystemBase {
     kMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     controller.setPID(controllerConfig.kP(), controllerConfig.kI(), controllerConfig.kD());
-    controller.enableContinuousInput(-180, 180);
     controller.setConstraints(
         new Constraints(controllerConfig.kMaxVelo(), controllerConfig.kMaxAccel()));
     feedforward.setKs(controllerConfig.kS());

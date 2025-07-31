@@ -6,8 +6,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class RollersConstant {
 
-  public static int kSensorPort = 0;
-  public static int kMotorPort = 35;
+  public static int kSensorPort = 42;
+  public static int kMotorPort = 43;
 
   public static RollerHardware rollerHardware = new RollerHardware(false, 0, IdleMode.kCoast, 0, 0);
 

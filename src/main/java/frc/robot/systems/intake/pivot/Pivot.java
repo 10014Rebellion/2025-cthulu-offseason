@@ -83,6 +83,8 @@ public class Pivot extends SubsystemBase {
     controller.setPID(controllerConfig.kP(), controllerConfig.kI(), controllerConfig.kD());
     controller.setConstraints(
         new Constraints(controllerConfig.kMaxVelo(), controllerConfig.kMaxAccel()));
+
+    
     feedforward.setKs(controllerConfig.kS());
     feedforward.setKg(controllerConfig.kG());
     feedforward.setKv(controllerConfig.kV());
@@ -197,6 +199,10 @@ public class Pivot extends SubsystemBase {
 
     if (goal != null) {
       setPosistion(goal.getGoalRotations());
+
+      double demand = controller.calculate(getPosistion().getRotations(), goal.getGoalRotations());
+      demand += feedforward.calculate(getPosistion().getRadians(), getVelocity());
+      setVoltage(demand);
     }
   }
 }
