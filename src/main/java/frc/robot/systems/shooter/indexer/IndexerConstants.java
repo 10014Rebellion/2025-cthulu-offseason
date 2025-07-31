@@ -1,19 +1,18 @@
 // REBELLION 10014
 
-package frc.robot.systems.intake.rollers;
+package frc.robot.systems.shooter.indexer;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-public class RollersConstant {
+public class IndexerConstants {
 
   public static int kSensorPort = 0;
-  public static int kMotorPort = 35;
+  public static int kLeftMotorPort = 32;
+  public static int kRightMotorPort = 33;
 
-  public static RollerHardware rollerHardware = new RollerHardware(false, 0, IdleMode.kCoast, 0, 0);
+  public static final IndexerHardware kIndexerHardware = new IndexerHardware(false, 2, IdleMode.kCoast, 60, 2);
 
-  public static SensorHardware sensorHardware = new SensorHardware(0, 0, 0);
-
-  public record RollerHardware(
+  public record IndexerHardware(
       boolean invert,
       double gearing,
       IdleMode idleMode,

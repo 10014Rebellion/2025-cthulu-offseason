@@ -11,6 +11,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -45,9 +46,6 @@ public class Arm extends SubsystemBase {
 
   private SparkMaxConfig motorConfig = new SparkMaxConfig();
 
-  private ProfiledPIDController controller = new ProfiledPIDController(0, 0, 0, null);
-  private ArmFeedforward feedforward = new ArmFeedforward(0, 0, 0);
-
   private LoggedTunableNumber kTuneableP = new LoggedTunableNumber("Arm/Tuneables/kP", 0.0);
   private LoggedTunableNumber kTuneableI = new LoggedTunableNumber("Arm/Tuneables/kI", 0.0);
   private LoggedTunableNumber kTuneableD = new LoggedTunableNumber("Arm/Tuneables/kD", 0.0);
@@ -57,6 +55,13 @@ public class Arm extends SubsystemBase {
   private LoggedTunableNumber kTuneableS = new LoggedTunableNumber("Arm/Tuneables/kS", 0.0);
   private LoggedTunableNumber kTuneableV = new LoggedTunableNumber("Arm/Tuneables/kV", 0.0);
   private LoggedTunableNumber kTuneableG = new LoggedTunableNumber("Arm/Tuneables/kG", 0.0);
+
+  private ProfiledPIDController controller = new ProfiledPIDController(
+    kTuneableP.get(), 
+    kTuneableI.get(), 
+    kTuneableD.get(), 
+    new TrapezoidProfile.Constraints(kTuneableVelocity.get(), kTuneableAccel.get()));
+  private ArmFeedforward feedforward = new ArmFeedforward(kTuneableS.get(), kTuneableG.get(), kTuneableV.get());
 
   @AutoLogOutput(key = "Arm/Goal")
   private ArmGoal goal = null;
@@ -73,6 +78,7 @@ public class Arm extends SubsystemBase {
     kMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     controller.setPID(controllerConfig.kP(), controllerConfig.kI(), controllerConfig.kD());
+    controller.enableContinuousInput(-180, 180);
     controller.setConstraints(
         new Constraints(controllerConfig.kMaxVelo(), controllerConfig.kMaxAccel()));
     feedforward.setKs(controllerConfig.kS());
