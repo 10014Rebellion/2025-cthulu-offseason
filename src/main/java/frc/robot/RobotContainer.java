@@ -182,15 +182,12 @@ public class RobotContainer {
     operatController
         .rightTrigger()
         .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      pivot.setGoal(PivotGoal.INTAKE);
-                    })
+            pivot.setGoalCommandContinued(PivotGoal.INTAKE)
                 .alongWith(
                     Commands.runOnce(
                         () -> {
                           rollers.setGoal(RollerGoal.INTAKE);
-                        }))
+                        })).onlyWhile(hasGamepeiceTrigger)
                 .andThen(
                     Commands.runOnce(
                             () -> {
@@ -201,7 +198,7 @@ public class RobotContainer {
                                 () -> {
                                   rollers.setGoal(RollerGoal.HOLD);
                                 })))
-                .onlyWhile(hasGamepeiceTrigger));
+                );
   }
 
   /**

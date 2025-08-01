@@ -116,33 +116,16 @@ public class Pivot extends SubsystemBase {
   }
 
   public void setGoal(PivotGoal desiredGoal) {
-    goal = desiredGoal;
+      goal = desiredGoal;
+      if(goal != null) {
+        controller.reset(getPosistion().getRotations());
+        controller.setGoal(goal.getGoalRotations());
+        controller.setTolerance(2 / 360.0);
+      }
   }
 
-  public Command setPosistion(double goal) {
-    return new FunctionalCommand(
-            () -> {
-              controller.reset(getPosistion().getRotations());
-              controller.setGoal(goal);
-              controller.setTolerance(2 / 360.0);
-            },
-            () -> {
-              double demand = controller.calculate(getPosistion().getRotations(), goal);
-              setVoltage(demand);
-            },
-            (interrupted) -> {},
-            () -> controller.atGoal(),
-            this)
-        .andThen(
-            new FunctionalCommand(
-                () -> {},
-                () -> {
-                  double demand = feedforward.calculate(getPosistion().getRadians(), getVelocity());
-                  setVoltage(demand);
-                },
-                (interrupted) -> {},
-                () -> false,
-                this));
+  public Command setGoalCommandContinued(PivotGoal desiredGoal) {
+    return new FunctionalCommand(() -> setGoal(desiredGoal), () -> {}, (interrupted) -> {}, () -> false, this);
   }
 
   public void setPID(double kP, double kI, double kD) {
@@ -197,8 +180,6 @@ public class Pivot extends SubsystemBase {
         kTuneableAccel);
 
     if (goal != null) {
-      setPosistion(goal.getGoalRotations());
-
       double demand = controller.calculate(getPosistion().getRotations(), goal.getGoalRotations());
       demand += feedforward.calculate(getPosistion().getRadians(), getVelocity());
       setVoltage(demand);

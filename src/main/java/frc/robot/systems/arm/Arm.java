@@ -115,32 +115,11 @@ public class Arm extends SubsystemBase {
 
   public void setGoal(ArmGoal desiredGoal) {
     goal = desiredGoal;
-  }
-
-  public Command setPosistion(double goal) {
-    return new FunctionalCommand(
-            () -> {
-              controller.reset(getPosistion().getRotations());
-              controller.setGoal(goal);
-              controller.setTolerance(2 / 360.0);
-            },
-            () -> {
-              double demand = controller.calculate(getPosistion().getRotations(), goal);
-              setVoltage(demand);
-            },
-            (interrupted) -> {},
-            () -> controller.atGoal(),
-            this)
-        .andThen(
-            new FunctionalCommand(
-                () -> {},
-                () -> {
-                  double demand = feedforward.calculate(getPosistion().getRadians(), getVelocity());
-                  setVoltage(demand);
-                },
-                (interrupted) -> {},
-                () -> false,
-                this));
+    if(goal != null) {
+      controller.reset(getPosistion().getRotations());
+      controller.setGoal(goal.getGoalRotations());
+      controller.setTolerance(2 / 360.0);
+    }
   }
 
   public void setPID(double kP, double kI, double kD) {
@@ -151,6 +130,10 @@ public class Arm extends SubsystemBase {
 
   public void setConstraints(double kMaxVelo, double kMaxAccel) {
     controller.setConstraints(new Constraints(kMaxVelo, kMaxAccel));
+  }
+
+    public Command setGoalCommandContinued(ArmGoal desiredGoal) {
+    return new FunctionalCommand(() -> setGoal(desiredGoal), () -> {}, (interrupted) -> {}, () -> false, this);
   }
 
   public void setFF(double kS, double kV, double kG) {
@@ -195,7 +178,9 @@ public class Arm extends SubsystemBase {
         kTuneableAccel);
 
     if (goal != null) {
-      setPosistion(goal.getGoalRotations());
+      double demand = controller.calculate(getPosistion().getRotations(), goal.getGoalRotations());
+      demand += feedforward.calculate(getPosistion().getRadians(), getVelocity());
+      setVoltage(demand);
     }
   }
 }
