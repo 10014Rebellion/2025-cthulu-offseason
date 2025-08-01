@@ -10,7 +10,8 @@ public class FlywheelConstants {
   public static int kTopMotorPort = 32;
   public static int kBottomMotorPort = 33;
 
-  public static final IndexerHardware kIndexerHardware = new IndexerHardware(false, 2, IdleMode.kCoast, 60, 2);
+  public static final IndexerHardware kIndexerHardware =
+      new IndexerHardware(false, 2, IdleMode.kCoast, 60, 2);
 
   public record IndexerHardware(
       boolean invert,

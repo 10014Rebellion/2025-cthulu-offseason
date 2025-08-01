@@ -84,7 +84,6 @@ public class Pivot extends SubsystemBase {
     controller.setConstraints(
         new Constraints(controllerConfig.kMaxVelo(), controllerConfig.kMaxAccel()));
 
-    
     feedforward.setKs(controllerConfig.kS());
     feedforward.setKg(controllerConfig.kG());
     feedforward.setKv(controllerConfig.kV());

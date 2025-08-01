@@ -56,12 +56,14 @@ public class Arm extends SubsystemBase {
   private LoggedTunableNumber kTuneableV = new LoggedTunableNumber("Arm/Tuneables/kV", 0.0);
   private LoggedTunableNumber kTuneableG = new LoggedTunableNumber("Arm/Tuneables/kG", 0.0);
 
-  private ProfiledPIDController controller = new ProfiledPIDController(
-    kTuneableP.get(), 
-    kTuneableI.get(), 
-    kTuneableD.get(), 
-    new TrapezoidProfile.Constraints(kTuneableVelocity.get(), kTuneableAccel.get()));
-  private ArmFeedforward feedforward = new ArmFeedforward(kTuneableS.get(), kTuneableG.get(), kTuneableV.get());
+  private ProfiledPIDController controller =
+      new ProfiledPIDController(
+          kTuneableP.get(),
+          kTuneableI.get(),
+          kTuneableD.get(),
+          new TrapezoidProfile.Constraints(kTuneableVelocity.get(), kTuneableAccel.get()));
+  private ArmFeedforward feedforward =
+      new ArmFeedforward(kTuneableS.get(), kTuneableG.get(), kTuneableV.get());
 
   @AutoLogOutput(key = "Arm/Goal")
   private ArmGoal goal = null;

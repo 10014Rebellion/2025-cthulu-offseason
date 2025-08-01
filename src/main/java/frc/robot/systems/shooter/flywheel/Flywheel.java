@@ -6,16 +6,13 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
-
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.systems.shooter.flywheel.FlywheelConstants.IndexerHardware;
 import frc.robot.utils.LoggedTunableNumber;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -41,10 +38,12 @@ public class Flywheel extends SubsystemBase {
   }
 
   // Hardware //
-  private final SparkFlex kTopMotor = new SparkFlex(FlywheelConstants.kTopMotorPort, MotorType.kBrushless);
+  private final SparkFlex kTopMotor =
+      new SparkFlex(FlywheelConstants.kTopMotorPort, MotorType.kBrushless);
   private RelativeEncoder kTopEncoder;
 
-  private final SparkFlex kBottomMotor = new SparkFlex(FlywheelConstants.kBottomMotorPort, MotorType.kBrushless);
+  private final SparkFlex kBottomMotor =
+      new SparkFlex(FlywheelConstants.kBottomMotorPort, MotorType.kBrushless);
   private RelativeEncoder kBottomEncoder;
 
   // Records //
@@ -81,14 +80,15 @@ public class Flywheel extends SubsystemBase {
     topMotorConfig.secondaryCurrentLimit(kTopMotorHardware.secondaryCurrentLimitAmps());
     topMotorConfig.idleMode(kTopMotorHardware.idleMode());
 
-    topMotorConfig.encoder.positionConversionFactor(24.0/16.0);
+    topMotorConfig.encoder.positionConversionFactor(24.0 / 16.0);
 
     topMotorConfig.closedLoop.p(kTuneabletopP.get());
     topMotorConfig.closedLoop.i(kTuneabletopI.get());
     topMotorConfig.closedLoop.d(kTuneabletopD.get());
 
-    kTopMotor.configure(topMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  
+    kTopMotor.configure(
+        topMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     kTopEncoder = kTopMotor.getEncoder();
 
     this.kBottomMotorHardware = FlywheelConstants.kIndexerHardware;
@@ -98,13 +98,14 @@ public class Flywheel extends SubsystemBase {
     bottomMotorConfig.secondaryCurrentLimit(kBottomMotorHardware.secondaryCurrentLimitAmps());
     bottomMotorConfig.idleMode(kBottomMotorHardware.idleMode());
 
-    bottomMotorConfig.encoder.positionConversionFactor(24.0/16.0);
+    bottomMotorConfig.encoder.positionConversionFactor(24.0 / 16.0);
 
     bottomMotorConfig.closedLoop.p(kTuneableBottomP.get());
     bottomMotorConfig.closedLoop.i(kTuneableBottomI.get());
     bottomMotorConfig.closedLoop.d(kTuneableBottomD.get());
 
-    kBottomMotor.configure(bottomMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    kBottomMotor.configure(
+        bottomMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     kBottomEncoder = kBottomMotor.getEncoder();
   }
@@ -189,18 +190,26 @@ public class Flywheel extends SubsystemBase {
     Logger.recordOutput("Shooter/RollerBottom/Voltage", getBottomAppliedVoltage());
     Logger.recordOutput("Shooter/RollerBottom/OutputAmps", getBottomOutputAmps());
 
-
     if (goal != null) {
       setVelocity(goal.getGoalVelocityRPM(), goal.getGoalVelocityRPM());
     }
 
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> {
+          settopPID();
+        },
+        kTuneabletopP,
+        kTuneabletopI,
+        kTuneabletopD);
 
-    LoggedTunableNumber.ifChanged(hashCode(), () -> {
-      settopPID();
-    }, kTuneabletopP, kTuneabletopI, kTuneabletopD);
-    
-    LoggedTunableNumber.ifChanged(hashCode(), () -> {
-      setBottomPID();
-    }, kTuneableBottomP, kTuneableBottomI, kTuneableBottomD);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> {
+          setBottomPID();
+        },
+        kTuneableBottomP,
+        kTuneableBottomI,
+        kTuneableBottomD);
   }
 }
