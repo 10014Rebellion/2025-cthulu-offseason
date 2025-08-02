@@ -18,25 +18,17 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.systems.arm.Arm;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.GyroIO;
 import frc.robot.systems.drive.GyroIOPigeon2;
 import frc.robot.systems.drive.ModuleIO;
 import frc.robot.systems.drive.ModuleIOSim;
 import frc.robot.systems.drive.ModuleIOSpark;
-import frc.robot.systems.intake.pivot.Pivot;
-import frc.robot.systems.intake.pivot.Pivot.PivotGoal;
-import frc.robot.systems.intake.rollers.Rollers;
-import frc.robot.systems.intake.rollers.Rollers.RollerGoal;
-import frc.robot.systems.shooter.flywheel.Flywheel;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -48,16 +40,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Pivot pivot;
-  private final Rollers rollers;
-  private final Arm arm;
-  private final Flywheel indexer;
-
-  private final EventLoop teleopLoop = new EventLoop();
 
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
-  private final CommandXboxController operatController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -75,11 +60,6 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
 
-        arm = new Arm();
-        rollers = new Rollers();
-        pivot = new Pivot();
-        indexer = new Flywheel();
-
         break;
 
       case SIM:
@@ -91,10 +71,6 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        arm = new Arm();
-        rollers = new Rollers();
-        pivot = new Pivot();
-        indexer = new Flywheel();
 
         break;
 
@@ -107,11 +83,6 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-
-        arm = new Arm();
-        rollers = new Rollers();
-        pivot = new Pivot();
-        indexer = new Flywheel();
 
         break;
     }
@@ -147,8 +118,6 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
-    Trigger hasGamepeiceTrigger = new Trigger(teleopLoop, rollers::hasGamepeice);
-
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -177,28 +146,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    // Intake Coral
-    operatController
-        .rightTrigger()
-        .onTrue(
-            pivot.setGoalCommandContinued(PivotGoal.INTAKE)
-                .alongWith(
-                    Commands.runOnce(
-                        () -> {
-                          rollers.setGoal(RollerGoal.INTAKE);
-                        })).onlyWhile(hasGamepeiceTrigger)
-                .andThen(
-                    Commands.runOnce(
-                            () -> {
-                              pivot.setGoal(PivotGoal.STOW);
-                            })
-                        .alongWith(
-                            Commands.runOnce(
-                                () -> {
-                                  rollers.setGoal(RollerGoal.HOLD);
-                                })))
-                );
   }
 
   /**

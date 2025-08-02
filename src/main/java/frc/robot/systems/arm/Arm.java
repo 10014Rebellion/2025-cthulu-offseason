@@ -1,125 +1,166 @@
 package frc.robot.systems.arm;
 
-import static frc.robot.systems.arm.ArmConstants.*;
-
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.systems.arm.ArmConstants.ArmHardware;
-import frc.robot.systems.arm.ArmConstants.EncoderHardware;
 import frc.robot.utils.LoggedTunableNumber;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
+  private final SparkMax mArmMotor;
+  private final AbsoluteEncoder mArmEncoder;
 
-  public enum ArmGoal {
-    INTAKE(Rotation2d.fromDegrees(0.0)),
-    SHOOT(Rotation2d.fromDegrees(0.0));
-
-    private double goalRotations;
-
-    private ArmGoal(Rotation2d goalRotations) {
-      this.goalRotations = goalRotations.getRotations();
-    }
-
-    public double getGoalRotations() {
-      return goalRotations;
-    }
-  }
-
-  private final SparkMax kMotor = new SparkMax(kMotorPort, MotorType.kBrushless);
-
-  private final ArmHardware kMotorHardware;
-  private final EncoderHardware kEncoderHardware;
-
-  private SparkMaxConfig motorConfig = new SparkMaxConfig();
-
-  private LoggedTunableNumber kTuneableP = new LoggedTunableNumber("Arm/Tuneables/kP", 0.0);
-  private LoggedTunableNumber kTuneableI = new LoggedTunableNumber("Arm/Tuneables/kI", 0.0);
-  private LoggedTunableNumber kTuneableD = new LoggedTunableNumber("Arm/Tuneables/kD", 0.0);
-  private LoggedTunableNumber kTuneableVelocity =
-      new LoggedTunableNumber("Arm/Tuneables/kVelocity", 0.0);
-  private LoggedTunableNumber kTuneableAccel = new LoggedTunableNumber("Arm/Tuneables/kAccel", 0.0);
-  private LoggedTunableNumber kTuneableS = new LoggedTunableNumber("Arm/Tuneables/kS", 0.0);
-  private LoggedTunableNumber kTuneableV = new LoggedTunableNumber("Arm/Tuneables/kV", 0.0);
-  private LoggedTunableNumber kTuneableG = new LoggedTunableNumber("Arm/Tuneables/kG", 0.0);
+  private LoggedTunableNumber nTuneableP =
+      new LoggedTunableNumber("Arm/Tuneables/kP", ArmConstants.kP);
+  private LoggedTunableNumber nTuneableI =
+      new LoggedTunableNumber("Arm/Tuneables/kI", ArmConstants.kI);
+  private LoggedTunableNumber nTuneableD =
+      new LoggedTunableNumber("Arm/Tuneables/kD", ArmConstants.kD);
+  private LoggedTunableNumber nTuneableVelocity =
+      new LoggedTunableNumber("Arm/Tuneables/kVelocity", ArmConstants.kV);
+  private LoggedTunableNumber nTuneableAccel =
+      new LoggedTunableNumber("Arm/Tuneables/kAccel", ArmConstants.kA);
+  private LoggedTunableNumber nTuneableS =
+      new LoggedTunableNumber("Arm/Tuneables/kS", ArmConstants.kS);
+  private LoggedTunableNumber nTuneableV =
+      new LoggedTunableNumber("Arm/Tuneables/kV", ArmConstants.kV);
+  private LoggedTunableNumber nTuneableG =
+      new LoggedTunableNumber("Arm/Tuneables/kG", ArmConstants.kG);
+  private LoggedTunableNumber nTuneableSetpoint =
+      new LoggedTunableNumber("Arm/Tuneables/Setpoint", 0.0);
 
   private ProfiledPIDController controller =
       new ProfiledPIDController(
-          kTuneableP.get(),
-          kTuneableI.get(),
-          kTuneableD.get(),
-          new TrapezoidProfile.Constraints(kTuneableVelocity.get(), kTuneableAccel.get()));
+          nTuneableP.get(),
+          nTuneableI.get(),
+          nTuneableD.get(),
+          new TrapezoidProfile.Constraints(nTuneableVelocity.get(), nTuneableAccel.get()));
   private ArmFeedforward feedforward =
-      new ArmFeedforward(kTuneableS.get(), kTuneableG.get(), kTuneableV.get());
-
-  @AutoLogOutput(key = "Arm/Goal")
-  private ArmGoal goal = null;
+      new ArmFeedforward(nTuneableS.get(), nTuneableG.get(), nTuneableV.get());
 
   public Arm() {
-    this.kMotorHardware = ArmConstants.armhardware;
-    this.kEncoderHardware = ArmConstants.encoderHardware;
+    this.mArmMotor = new SparkMax(ArmConstants.kMotorID, ArmConstants.kMotorType);
+    this.mArmEncoder = mArmMotor.getAbsoluteEncoder();
+    this.mArmMotor.configure(
+        ArmConstants.kMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    motorConfig.inverted(kMotorHardware.invert());
-    motorConfig.smartCurrentLimit(kMotorHardware.smartCurrentLimitAmps());
-    motorConfig.secondaryCurrentLimit(kMotorHardware.secondaryCurrentLimitAmps());
-    motorConfig.idleMode(kMotorHardware.idleMode());
-
-    kMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    controller.setPID(controllerConfig.kP(), controllerConfig.kI(), controllerConfig.kD());
-    controller.setConstraints(
-        new Constraints(controllerConfig.kMaxVelo(), controllerConfig.kMaxAccel()));
-    feedforward.setKs(controllerConfig.kS());
-    feedforward.setKg(controllerConfig.kG());
-    feedforward.setKv(controllerConfig.kV());
+    controller.setPID(nTuneableP.get(), nTuneableI.get(), nTuneableD.get());
+    controller.setConstraints(new Constraints(nTuneableVelocity.get(), nTuneableAccel.get()));
+    feedforward.setKs(nTuneableS.get());
+    feedforward.setKg(nTuneableG.get());
+    feedforward.setKv(nTuneableV.get());
   }
 
   public Rotation2d getPosistion() {
-    return Rotation2d.fromRotations(kMotor.getAbsoluteEncoder().getPosition())
-        .minus(encoderHardware.offset());
+    return Rotation2d.fromDegrees(mArmMotor.getAbsoluteEncoder().getPosition());
+  }
+
+  public double getPosistionDegrees() {
+    return mArmMotor.getAbsoluteEncoder().getPosition();
+  }
+
+  public double getPosistionRadians() {
+    return Units.degreesToRadians(mArmMotor.getAbsoluteEncoder().getPosition());
   }
 
   public double getVelocity() {
-    return kMotor.getAbsoluteEncoder().getVelocity();
+    return mArmMotor.getAbsoluteEncoder().getVelocity();
   }
 
   public double getAppliedVoltage() {
-    return kMotor.getAppliedOutput() * kMotor.getBusVoltage();
+    return mArmMotor.getAppliedOutput() * mArmMotor.getBusVoltage();
   }
 
   public double getOutputAmps() {
-    return kMotor.getOutputCurrent();
+    return mArmMotor.getOutputCurrent();
   }
 
   public double getTemp() {
-    return kMotor.getMotorTemperature();
+    return mArmMotor.getMotorTemperature();
   }
 
   public void setVoltage(double volts) {
     volts = MathUtil.applyDeadband(volts, -12.0, 12.0);
-    kMotor.setVoltage(volts);
+    mArmMotor.setVoltage(volts);
   }
 
-  public void setGoal(ArmGoal desiredGoal) {
-    goal = desiredGoal;
-    if(goal != null) {
-      controller.reset(getPosistion().getRotations());
-      controller.setGoal(goal.getGoalRotations());
-      controller.setTolerance(2 / 360.0);
-    }
+  public FunctionalCommand enableFFCmd() {
+
+    return new FunctionalCommand(
+        () -> {
+          System.out.println("Arm FF Running");
+        },
+        () -> {
+          double calculatedOutput =
+              feedforward.calculate(Units.degreesToRadians(getPosistionDegrees()), 0);
+          setVoltage(calculatedOutput);
+        },
+        (interrupted) ->
+            setVoltage(feedforward.calculate(Units.degreesToRadians(getPosistionDegrees()), 0)),
+        () -> false,
+        this);
+  }
+
+  public boolean isPIDAtGoal() {
+    return controller.atGoal();
+  }
+
+  public FunctionalCommand setPIDCmd(double pSetpoint) {
+    return new FunctionalCommand(
+        () -> {
+          controller.reset(getPosistionDegrees());
+          controller.setGoal(pSetpoint);
+        },
+        () -> {
+          double encoderReading = getPosistionDegrees();
+          double calculatedPID = controller.calculate(encoderReading);
+          double calculatedFF =
+              feedforward.calculate(
+                  Units.degreesToRadians(controller.getSetpoint().position),
+                  Units.degreesToRadians(controller.getSetpoint().velocity));
+
+          setVoltage(calculatedPID + calculatedFF);
+          // SmartDashboard.putNumber("Wrist/Full Output", calculatedPID + calculatedFF);
+          // SmartDashboard.putNumber("Wrist/PID Output", calculatedPID);
+          // SmartDashboard.putNumber("Wrist/FF Output", calculatedFF);
+        },
+        (interrupted) -> setVoltage(0),
+        () -> isPIDAtGoal(),
+        this);
+  }
+
+  public FunctionalCommand setTuneablePIDCmd() {
+    return new FunctionalCommand(
+        () -> {
+          controller.reset(getPosistionDegrees());
+          controller.setGoal(nTuneableSetpoint.get());
+        },
+        () -> {
+          double encoderReading = getPosistionDegrees();
+          double calculatedPID = controller.calculate(encoderReading);
+          double calculatedFF =
+              feedforward.calculate(
+                  Units.degreesToRadians(controller.getSetpoint().position),
+                  Units.degreesToRadians(controller.getSetpoint().velocity));
+
+          setVoltage(calculatedPID + calculatedFF);
+          // SmartDashboard.putNumber("Wrist/Full Output", calculatedPID + calculatedFF);
+          // SmartDashboard.putNumber("Wrist/PID Output", calculatedPID);
+          // SmartDashboard.putNumber("Wrist/FF Output", calculatedFF);
+        },
+        (interrupted) -> setVoltage(0),
+        () -> isPIDAtGoal(),
+        this);
   }
 
   public void setPID(double kP, double kI, double kD) {
@@ -132,10 +173,6 @@ public class Arm extends SubsystemBase {
     controller.setConstraints(new Constraints(kMaxVelo, kMaxAccel));
   }
 
-    public Command setGoalCommandContinued(ArmGoal desiredGoal) {
-    return new FunctionalCommand(() -> setGoal(desiredGoal), () -> {}, (interrupted) -> {}, () -> false, this);
-  }
-
   public void setFF(double kS, double kV, double kG) {
     feedforward.setKg(kG);
     feedforward.setKv(kV);
@@ -144,7 +181,6 @@ public class Arm extends SubsystemBase {
 
   @Override
   public void periodic() {
-
     Logger.recordOutput("Arm/Temperature C*", getTemp());
     Logger.recordOutput("Arm/Velocity Rot.s", getVelocity());
     Logger.recordOutput("Arm/Voltage", getAppliedVoltage());
@@ -154,33 +190,27 @@ public class Arm extends SubsystemBase {
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {
-          setPID(kTuneableP.get(), kTuneableI.get(), kTuneableD.get());
+          setPID(nTuneableP.get(), nTuneableI.get(), nTuneableD.get());
         },
-        kTuneableP,
-        kTuneableI,
-        kTuneableD);
+        nTuneableP,
+        nTuneableI,
+        nTuneableD);
 
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {
-          setFF(kTuneableS.get(), kTuneableV.get(), kTuneableG.get());
+          setFF(nTuneableS.get(), nTuneableV.get(), nTuneableG.get());
         },
-        kTuneableS,
-        kTuneableV,
-        kTuneableG);
+        nTuneableS,
+        nTuneableV,
+        nTuneableG);
 
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {
-          setConstraints(kTuneableVelocity.get(), kTuneableAccel.get());
+          setConstraints(nTuneableVelocity.get(), nTuneableAccel.get());
         },
-        kTuneableVelocity,
-        kTuneableAccel);
-
-    if (goal != null) {
-      double demand = controller.calculate(getPosistion().getRotations(), goal.getGoalRotations());
-      demand += feedforward.calculate(getPosistion().getRadians(), getVelocity());
-      setVoltage(demand);
-    }
+        nTuneableVelocity,
+        nTuneableAccel);
   }
 }
