@@ -43,7 +43,8 @@ public class DriveConstants {
   //   public static final Rotation2d backRightZeroRotation =
   //       Rotation2d.fromRadians(0.4897810 - (Math.PI / 2.0));
 
-  // NOTE: This is not being applied to the encoder or spark max, but as an additional offset outside the controller.
+  // NOTE: This is not being applied to the encoder or spark max, but as an additional offset
+  // outside the controller.
   public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0));
   public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRadians((Math.PI));
   public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0);

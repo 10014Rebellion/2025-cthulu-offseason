@@ -78,6 +78,28 @@ public class Intake extends SubsystemBase {
         || getPivotAngleDeg() >= Pivot.kUpperLimitDeg;
   }
 
+  public FunctionalCommand setPivotVoltageCommand(double pVolts) {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          mPivotMotor.setVoltage(clampVoltage(pVolts));
+        },
+        (interrupted) -> setPivotVolts(0),
+        () -> false,
+        this);
+  }
+
+  public FunctionalCommand setRollerVoltageCommand(double pVolts) {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          setRollerVolts(pVolts);
+        },
+        (interrupted) -> setRollerVolts(0),
+        () -> false,
+        this);
+  }
+
   public FunctionalCommand intakePivotFF() {
     return new FunctionalCommand(
         () -> {

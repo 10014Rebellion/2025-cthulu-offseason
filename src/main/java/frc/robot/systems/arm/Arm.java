@@ -13,6 +13,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.utils.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
@@ -27,9 +28,9 @@ public class Arm extends SubsystemBase {
   private LoggedTunableNumber nTuneableD =
       new LoggedTunableNumber("Arm/Tuneables/kD", ArmConstants.kD);
   private LoggedTunableNumber nTuneableVelocity =
-      new LoggedTunableNumber("Arm/Tuneables/kVelocity", ArmConstants.kV);
+      new LoggedTunableNumber("Arm/Tuneables/kVelocity", ArmConstants.kMaxVelocity);
   private LoggedTunableNumber nTuneableAccel =
-      new LoggedTunableNumber("Arm/Tuneables/kAccel", ArmConstants.kA);
+      new LoggedTunableNumber("Arm/Tuneables/kAccel", ArmConstants.kMaxAcceleration);
   private LoggedTunableNumber nTuneableS =
       new LoggedTunableNumber("Arm/Tuneables/kS", ArmConstants.kS);
   private LoggedTunableNumber nTuneableV =
@@ -56,21 +57,24 @@ public class Arm extends SubsystemBase {
 
     controller.setPID(nTuneableP.get(), nTuneableI.get(), nTuneableD.get());
     controller.setConstraints(new Constraints(nTuneableVelocity.get(), nTuneableAccel.get()));
+    controller.setTolerance(ArmConstants.kTolerance);
     feedforward.setKs(nTuneableS.get());
     feedforward.setKg(nTuneableG.get());
     feedforward.setKv(nTuneableV.get());
   }
 
   public Rotation2d getPosistion() {
-    return Rotation2d.fromDegrees(mArmMotor.getAbsoluteEncoder().getPosition());
+    return Rotation2d.fromDegrees(getPosistionDegrees());
   }
 
   public double getPosistionDegrees() {
-    return mArmMotor.getAbsoluteEncoder().getPosition();
+    if (mArmMotor.getAbsoluteEncoder().getPosition() >= 180.0) {
+      return mArmMotor.getAbsoluteEncoder().getPosition() - 360;
+    } else return mArmMotor.getAbsoluteEncoder().getPosition();
   }
 
   public double getPosistionRadians() {
-    return Units.degreesToRadians(mArmMotor.getAbsoluteEncoder().getPosition());
+    return Units.degreesToRadians(getPosistionDegrees());
   }
 
   public double getVelocity() {
@@ -89,9 +93,29 @@ public class Arm extends SubsystemBase {
     return mArmMotor.getMotorTemperature();
   }
 
-  public void setVoltage(double volts) {
-    volts = MathUtil.applyDeadband(volts, -12.0, 12.0);
-    mArmMotor.setVoltage(volts);
+  public void setVoltage(double pDesiredVolts) {
+    if (isAtLimit(pDesiredVolts)) mArmMotor.setVoltage(0.0);
+    else mArmMotor.setVoltage(clampVoltage(pDesiredVolts));
+  }
+
+  private double clampVoltage(double pVolts) {
+    return MathUtil.clamp(pVolts, -Constants.kRobotVoltage, Constants.kRobotVoltage);
+  }
+
+  private boolean isAtLimit(double pVolts) {
+    return (pVolts < 0 && getPosistionDegrees() <= ArmConstants.kLowerLimitDeg)
+        || (pVolts > 0 && getPosistionDegrees() >= ArmConstants.kUpperLimitDeg);
+  }
+
+  public FunctionalCommand setVoltageCommand(double pVolts) {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          setVoltage(pVolts);
+        },
+        (interrupted) -> setVoltage(0),
+        () -> false,
+        this);
   }
 
   public FunctionalCommand enableFFCmd() {
@@ -102,11 +126,11 @@ public class Arm extends SubsystemBase {
         },
         () -> {
           double calculatedOutput =
-              feedforward.calculate(Units.degreesToRadians(getPosistionDegrees()), 0);
+              feedforward.calculate(getPosistionRadians(), 0);
           setVoltage(calculatedOutput);
         },
         (interrupted) ->
-            setVoltage(feedforward.calculate(Units.degreesToRadians(getPosistionDegrees()), 0)),
+            setVoltage(feedforward.calculate(getPosistionRadians(), 0)),
         () -> false,
         this);
   }
@@ -154,6 +178,9 @@ public class Arm extends SubsystemBase {
                   Units.degreesToRadians(controller.getSetpoint().velocity));
 
           setVoltage(calculatedPID + calculatedFF);
+          Logger.recordOutput("Arm/Full Output", calculatedPID + calculatedFF);
+          Logger.recordOutput("Arm/PID Output", calculatedPID);
+          Logger.recordOutput("Arm/FF Output", calculatedFF);
           // SmartDashboard.putNumber("Wrist/Full Output", calculatedPID + calculatedFF);
           // SmartDashboard.putNumber("Wrist/PID Output", calculatedPID);
           // SmartDashboard.putNumber("Wrist/FF Output", calculatedFF);
@@ -185,8 +212,8 @@ public class Arm extends SubsystemBase {
     Logger.recordOutput("Arm/Velocity Rot.s", getVelocity());
     Logger.recordOutput("Arm/Voltage", getAppliedVoltage());
     Logger.recordOutput("Arm/OutputAmps", getOutputAmps());
-    Logger.recordOutput("Arm/Posistion", getPosistion().getDegrees());
-
+    Logger.recordOutput("Arm/Posistion", getPosistionDegrees());
+    Logger.recordOutput("Arm/Within Tolerance", isPIDAtGoal());
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {

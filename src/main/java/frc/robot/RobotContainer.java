@@ -23,12 +23,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.systems.arm.Arm;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.GyroIO;
 import frc.robot.systems.drive.GyroIOPigeon2;
 import frc.robot.systems.drive.ModuleIO;
 import frc.robot.systems.drive.ModuleIOSim;
 import frc.robot.systems.drive.ModuleIOSpark;
+import frc.robot.systems.intake.Intake;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -40,6 +42,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Arm arm;
+  private final Intake intake;
 
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
@@ -87,6 +91,9 @@ public class RobotContainer {
         break;
     }
 
+    arm = new Arm();
+    intake = new Intake();
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -108,6 +115,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    configureTestBindings();
   }
 
   /**
@@ -146,6 +154,19 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+  }
+
+  private void configureTestBindings() {
+    driveController.povUp().whileTrue(arm.setVoltageCommand(6.0));
+    driveController.povDown().whileTrue(arm.setVoltageCommand(-6.0));
+    driveController.x().whileTrue(arm.setTuneablePIDCmd());
+    driveController.y().whileTrue(arm.enableFFCmd());
+
+    // driveController.povRight().whileTrue(intake.setPivotVoltageCommand(3.0));
+    // driveController.povLeft().whileTrue(intake.setPivotVoltageCommand(-3.0));
+
+    driveController.povRight().whileTrue(intake.setRollerVoltageCommand(6.0));
+    driveController.povLeft().whileTrue(intake.setRollerVoltageCommand(-6.0));
   }
 
   /**
