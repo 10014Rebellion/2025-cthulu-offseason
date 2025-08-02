@@ -94,7 +94,7 @@ public class DriveCommands {
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
           drive.runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
+              ChassisSpeeds.fromFieldRelativeSpeeds( // TO DO: CHANGE BACK TO FIELD RELATIVE
                   speeds,
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))

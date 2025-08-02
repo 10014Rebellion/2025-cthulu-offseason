@@ -35,12 +35,19 @@ public class DriveConstants {
       };
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation =
-      new Rotation2d(0.54822190 + (Math.PI / 2.0));
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.8419364 + (Math.PI));
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.2028322); //
-  public static final Rotation2d backRightZeroRotation =
-      new Rotation2d(0.4897810 - (Math.PI / 2.0));
+  //   public static final Rotation2d frontLeftZeroRotation =
+  //       Rotation2d.fromRadians(0.54822190 + (Math.PI / 2.0));
+  //   public static final Rotation2d frontRightZeroRotation =
+  //       Rotation2d.fromRadians(0.8391006 + (Math.PI));
+  //   public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0.2028322);
+  //   public static final Rotation2d backRightZeroRotation =
+  //       Rotation2d.fromRadians(0.4897810 - (Math.PI / 2.0));
+
+  // NOTE: This is not being applied to the encoder or spark max, but as an additional offset outside the controller.
+  public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0));
+  public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRadians((Math.PI));
+  public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0);
+  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0));
 
   // Device CAN IDs
   public static final int pigeonCanId = 10;
