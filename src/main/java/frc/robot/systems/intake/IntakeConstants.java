@@ -27,10 +27,11 @@ public class IntakeConstants {
     public static final int kCurrentLimit = 50;
 
     public static final double kEncoderConversionFactor = 360;
-    public static final boolean kEncoderInverted = false;
+    public static final boolean kEncoderInverted = true;
     public static final double kMotorEncoderOffsetRev = 0.1413399;
-    public static final double kLowerLimitDeg = -30;
+    public static final double kLowerLimitDeg = -25;
     public static final double kUpperLimitDeg = 70;
+    public static final double kTolerance = 5.0;
 
     public static final double kP = 0.0;
     public static final double kD = 0.0;
@@ -43,10 +44,34 @@ public class IntakeConstants {
     public static final double kA = 0.0;
 
     public static final SparkMaxConfig kMotorConfig = new SparkMaxConfig();
+    public static final double kPositionConversionFactor = 360;
+    public static final double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
+
+    public enum Setpoints {
+      IntakeAlgae(15),
+      IntakeCoral(-25),
+      ScoreL1(60),
+      StowIntake(60);
+
+      public final double setpoint;
+
+      private Setpoints(double setpoint) {
+        this.setpoint = setpoint;
+      }
+
+      public double getPos() {
+        return this.setpoint;
+      }
+    };
 
     static {
       kMotorConfig.idleMode(kIdleMode).smartCurrentLimit(kCurrentLimit).inverted(kMotorInverted);
-      kMotorConfig.absoluteEncoder.inverted(kEncoderInverted).zeroOffset(kMotorEncoderOffsetRev);
+      kMotorConfig
+          .absoluteEncoder
+          .positionConversionFactor(kPositionConversionFactor)
+          .velocityConversionFactor(kVelocityConversionFactor)
+          .inverted(kEncoderInverted)
+          .zeroOffset(kMotorEncoderOffsetRev);
     }
   }
 
@@ -60,6 +85,23 @@ public class IntakeConstants {
     public static final int kCurrentLimit = 50;
 
     public static final SparkMaxConfig kMotorConfig = new SparkMaxConfig();
+
+    public enum Voltage {
+      IntakeAlgae(-6),
+      IntakeCoral(12),
+      HoldCoral(1),
+      ScoreL1(-12);
+
+      public final double voltage;
+
+      private Voltage(double voltage) {
+        this.voltage = voltage;
+      }
+
+      public double getVoltage() {
+        return this.voltage;
+      }
+    };
 
     static {
       kMotorConfig.idleMode(kIdleMode).smartCurrentLimit(kCurrentLimit).inverted(kMotorInverted);

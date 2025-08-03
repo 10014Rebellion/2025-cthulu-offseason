@@ -23,7 +23,7 @@ public class ArmConstants {
   public static double kTolerance = 1.0;
 
   public static double kUpperLimitDeg = 80; // Mechanical Limit: 90
-  public static double kLowerLimitDeg = -30; // Mechanical Limit: -40
+  public static double kLowerLimitDeg = -37; // Mechanical Limit: -40
 
   public static double kEncoderOffsetRotations = 0.8213854;
   public static boolean kEncoderInverted = true;

@@ -20,10 +20,14 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.systems.arm.Arm;
+import frc.robot.systems.arm.ArmConstants;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.GyroIO;
 import frc.robot.systems.drive.GyroIOPigeon2;
@@ -31,6 +35,9 @@ import frc.robot.systems.drive.ModuleIO;
 import frc.robot.systems.drive.ModuleIOSim;
 import frc.robot.systems.drive.ModuleIOSpark;
 import frc.robot.systems.intake.Intake;
+import frc.robot.systems.intake.IntakeConstants;
+import frc.robot.systems.shooter.Flywheels;
+import frc.robot.systems.shooter.ShooterConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -44,6 +51,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Arm arm;
   private final Intake intake;
+  private final Flywheels flywheels;
 
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
@@ -93,6 +101,7 @@ public class RobotContainer {
 
     arm = new Arm();
     intake = new Intake();
+    flywheels = new Flywheels();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -132,7 +141,7 @@ public class RobotContainer {
             drive,
             () -> -driveController.getLeftY(),
             () -> -driveController.getLeftX(),
-            () -> -driveController.getRightX()));
+            () -> driveController.getRightX()));
 
     // Lock to 0° when A button is held
     driveController
@@ -157,16 +166,71 @@ public class RobotContainer {
   }
 
   private void configureTestBindings() {
-    driveController.povUp().whileTrue(arm.setVoltageCommand(6.0));
-    driveController.povDown().whileTrue(arm.setVoltageCommand(-6.0));
-    driveController.x().whileTrue(arm.setTuneablePIDCmd());
-    driveController.y().whileTrue(arm.enableFFCmd());
+    // driveController.rightBumper().whileTrue(arm.setVoltageCommand(6.0));
+    // driveController.leftBumper().whileTrue(arm.setVoltageCommand(-6.0));
+    driveController
+        .rightTrigger()
+        .whileTrue(
+            new SequentialCommandGroup(
+                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.IntakeAlgae.getPos()),
+                new ParallelCommandGroup(
+                    arm.setPIDCmd(ArmConstants.Setpoints.Intake.getPos().getDegrees()),
+                    intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.IntakeAlgae.getPos()),
+                    intake.setRollerVoltageCommand(
+                        IntakeConstants.Roller.Voltage.IntakeAlgae.getVoltage()),
+                    flywheels.setTopFlywheelVoltageCommand(
+                        ShooterConstants.topFlywheel.Voltage.IntakeAlgae.getVoltage()),
+                    flywheels.setBottomFlywheelVoltageCommand(
+                        ShooterConstants.bottomFlywheel.Voltage.IntakeAlgae.getVoltage()),
+                    flywheels.setIndexerVoltageCommand(
+                        ShooterConstants.indexer.Voltage.IndexAlgae.getVoltage()))));
+    driveController
+        .leftTrigger()
+        .whileTrue(
+            new ParallelCommandGroup(
+                flywheels.setTopFlywheelVoltageCommand(
+                    ShooterConstants.topFlywheel.Voltage.BasicShootAlgae.getVoltage()),
+                flywheels.setBottomFlywheelVoltageCommand(
+                    ShooterConstants.bottomFlywheel.Voltage.BasicShootAlgae.getVoltage()),
+                flywheels.setIndexerVoltageCommand(2),
+                new SequentialCommandGroup(
+                    arm.setPIDCmd(30.0),
+                    new WaitCommand(0.5),
+                    flywheels.setIndexerVoltageCommand(
+                        ShooterConstants.indexer.Voltage.FireAlgae.getVoltage()))));
+    driveController
+        .rightBumper()
+        .whileTrue(
+            new ParallelCommandGroup(
+                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.IntakeCoral.getPos()),
+                intake.setRollerVoltageCommand(
+                    IntakeConstants.Roller.Voltage.IntakeCoral.getVoltage())))
+        .whileFalse(
+            new ParallelCommandGroup(
+                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()),
+                intake.setRollerVoltageCommand(
+                    IntakeConstants.Roller.Voltage.HoldCoral.getVoltage())));
+
+    driveController
+        .leftBumper()
+        .whileTrue(
+            new ParallelCommandGroup(
+                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.ScoreL1.getPos()),
+                intake.setRollerVoltageCommand(
+                    IntakeConstants.Roller.Voltage.ScoreL1.getVoltage())));
+    // driveController.x().whileTrue(arm.setTuneablePIDCmd());
+    // driveController.y().whileTrue(arm.enableFFCmd());
 
     // driveController.povRight().whileTrue(intake.setPivotVoltageCommand(3.0));
     // driveController.povLeft().whileTrue(intake.setPivotVoltageCommand(-3.0));
 
     driveController.povRight().whileTrue(intake.setRollerVoltageCommand(6.0));
     driveController.povLeft().whileTrue(intake.setRollerVoltageCommand(-6.0));
+    driveController.povUp().whileTrue(intake.setPivotVoltageCommand(1.5));
+    driveController.povDown().whileTrue(intake.setPivotVoltageCommand(-1.0));
+
+    driveController.x().whileTrue(intake.intakeTunablePivotToGoal());
+    driveController.y().whileTrue(intake.intakePivotFF());
   }
 
   /**

@@ -125,12 +125,10 @@ public class Arm extends SubsystemBase {
           System.out.println("Arm FF Running");
         },
         () -> {
-          double calculatedOutput =
-              feedforward.calculate(getPosistionRadians(), 0);
+          double calculatedOutput = feedforward.calculate(getPosistionRadians(), 0);
           setVoltage(calculatedOutput);
         },
-        (interrupted) ->
-            setVoltage(feedforward.calculate(getPosistionRadians(), 0)),
+        (interrupted) -> setVoltage(feedforward.calculate(getPosistionRadians(), 0)),
         () -> false,
         this);
   }
