@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -102,7 +103,10 @@ public class Flywheels extends SubsystemBase {
     return new FunctionalCommand(
       () -> {
         mTopController.reset(getTopFlywheelRPM());
-        mTopController.setGoal(pDesiredRPM);
+        mTopController.setGoal(MathUtil.clamp(pDesiredRPM, -topFlywheel.kMaxRPM, topFlywheel.kMaxRPM));
+        if (pDesiredRPM > topFlywheel.kMaxRPM) {
+          DriverStation.reportWarning("SETPOINT RPM " + pDesiredRPM + "EXCEEDS THE MAXIMUM RPM OF " + topFlywheel.kMaxRPM, true);
+        }
       }, 
       () -> {
         setTopFlywheelVoltage(mTopController.calculate(getTopFlywheelRPM()));
@@ -116,7 +120,10 @@ public class Flywheels extends SubsystemBase {
     return new FunctionalCommand(
       () -> {
         mBottomController.reset(getBottomFlywheelRPM());
-        mBottomController.setGoal(pDesiredRPM);
+        mBottomController.setGoal(MathUtil.clamp(pDesiredRPM, -bottomFlywheel.kMaxRPM, bottomFlywheel.kMaxRPM));
+        if (pDesiredRPM > bottomFlywheel.kMaxRPM) {
+          DriverStation.reportWarning("SETPOINT RPM " + pDesiredRPM + "EXCEEDS THE MAXIMUM RPM OF " + bottomFlywheel.kMaxRPM, true);
+        }
       }, 
       () -> {
         setBottomFlywheelVoltage(mBottomController.calculate(getBottomFlywheelRPM()));
