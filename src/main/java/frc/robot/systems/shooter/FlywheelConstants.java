@@ -31,6 +31,7 @@ public class FlywheelConstants {
 
     public enum Voltage {
       IntakeAlgae(6),
+      scoreProcessor(-6),
       BasicShootAlgae(-12);
 
       public final double voltage;
@@ -74,6 +75,7 @@ public class FlywheelConstants {
 
     public enum Voltage {
       IntakeAlgae(6),
+      scoreProcessor(-6),
       BasicShootAlgae(-12);
 
       public final double voltage;
@@ -116,6 +118,7 @@ public class FlywheelConstants {
     public enum Voltage {
       IndexAlgae(4),
       HoldAlgae(1),
+      scoreProcessor(-6),
       FireAlgae(-12);
 
       public final double voltage;

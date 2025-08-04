@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,15 +22,15 @@ public class Flywheels extends SubsystemBase {
   private final ProfiledPIDController mBottomController;
 
   private final SparkFlex mTopFlywheelMotor;
-  // private final RelativeEncoder mTopFlywheelEncoder;
   private final SparkFlex mBottomFlywheelMotor;
-  // private final SparkFlex mBottomFlywheelEncoder;
   private final SparkFlex mIndexerMotor;
+  private final DigitalInput mAlgaeSensor;
 
   public Flywheels() {
     this.mTopController = new ProfiledPIDController(FlywheelConstants.topFlywheel.kP, 0, FlywheelConstants.topFlywheel.kD, 
     new Constraints(FlywheelConstants.topFlywheel.kMaxVelocity, FlywheelConstants.topFlywheel.kMaxAcceleration));
     mTopController.setTolerance(topFlywheel.kToleranceRPM);
+
     this.mBottomController = new ProfiledPIDController(FlywheelConstants.bottomFlywheel.kP, 0, FlywheelConstants.bottomFlywheel.kD, 
     new Constraints(FlywheelConstants.bottomFlywheel.kMaxVelocity, FlywheelConstants.bottomFlywheel.kMaxAcceleration));
     mBottomController.setTolerance(bottomFlywheel.kToleranceRPM);
@@ -47,6 +48,8 @@ public class Flywheels extends SubsystemBase {
     this.mIndexerMotor = new SparkFlex(indexer.kMotorID, MotorType.kBrushless);
     this.mIndexerMotor.configure(
         indexer.kMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    this.mAlgaeSensor = new DigitalInput(FlywheelConstants.indexer.kSensorPort);
   }
 
   private void setTopFlywheelVoltage(double pDesiredVolts) {
@@ -91,6 +94,36 @@ public class Flywheels extends SubsystemBase {
         () -> false);
   }
 
+  public FunctionalCommand setAllVoltageCommand(double topVolts, double bottomVolts, double indexerVolts) {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          setTopFlywheelVoltage(topVolts);
+          setBottomFlywheelVoltage(bottomVolts);
+          setIndexerVoltage(indexerVolts);
+        },
+        (interrupted) -> {
+          setIndexerVoltage(0);
+        },
+        () -> false);
+  }
+
+  public FunctionalCommand intakeAlgaeCommand() {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          setTopFlywheelVoltage(topFlywheel.Voltage.IntakeAlgae.getVoltage());
+          setBottomFlywheelVoltage(bottomFlywheel.Voltage.IntakeAlgae.getVoltage());
+          setIndexerVoltage(indexer.Voltage.IndexAlgae.getVoltage());
+        },
+        (interrupted) -> {
+          setIndexerVoltage(indexer.Voltage.HoldAlgae.getVoltage());
+          setTopFlywheelVoltage(0.0);
+          setBottomFlywheelVoltage(0.0);
+        },
+        () -> getAlgaeDetected());
+  }
+
   public double getTopFlywheelRPM() {
     return mTopFlywheelMotor.getEncoder().getVelocity();
   }
@@ -98,6 +131,10 @@ public class Flywheels extends SubsystemBase {
   public double getBottomFlywheelRPM() {
     return mTopFlywheelMotor.getEncoder().getVelocity();
   } 
+
+  public boolean getAlgaeDetected() {
+    return !mAlgaeSensor.get();
+  }
 
   public FunctionalCommand setTopFlywheelRPM(double pDesiredRPM) {
     return new FunctionalCommand(
@@ -143,5 +180,6 @@ public class Flywheels extends SubsystemBase {
     Logger.recordOutput(
         "Flywheels/BottomFlywheel/Velocity", mBottomFlywheelMotor.getEncoder().getVelocity());
     Logger.recordOutput("Flywheels/Indexer/Velocity", mIndexerMotor.getEncoder().getVelocity());
+    Logger.recordOutput("Flywheels/Indexer/Algae Detected", getAlgaeDetected());
   }
 }

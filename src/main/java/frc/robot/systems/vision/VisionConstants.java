@@ -1,10 +1,15 @@
 package frc.robot.systems.vision;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 // import frc.robot.subsystems.drive.DriveConstants;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * RELATIVE TO THE INTAKE. INTAKE/SHOOTING SIDE IS FRONT!
@@ -57,6 +62,16 @@ public class VisionConstants {
    * This turns on a implementation of single tag vision algorithm that may be more accurate
    * https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2025-build-thread/477314/85
    */
+
+   // Tuned by using AdvantageScope data analysis tool(Normal distribution)
+  public static final Vector<N3> kSingleStdDevs = (RobotBase.isReal()) ?
+      VecBuilder.fill(0.274375, 0.274375, 5.0) : VecBuilder.fill(0.23, 0.23, 5.0);
+  public static final Vector<N3> kMultiStdDevs = (RobotBase.isReal()) ?
+      VecBuilder.fill(0.23188, 0.23188, 5.0) : VecBuilder.fill(0.23, 0.23, 5.0);
+
+  public static final double kAmbiguityThreshold = (RobotBase.isReal()) ? 0.2 : 1.0;
+
+  public static final Rotation2d kOV2311DiagonalCameraFOV = Rotation2d.fromDegrees(95.0);
   public static final boolean KUseSingleTagTransform = false;
 
   public static enum Orientation {

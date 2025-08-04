@@ -50,6 +50,8 @@ public class IntakeConstants {
     public enum Setpoints {
       IntakeAlgae(15),
       IntakeCoral(-25),
+      Processor(30),
+      AvoidArm(45),
       ScoreL1(60),
       StowIntake(60);
 
@@ -90,6 +92,7 @@ public class IntakeConstants {
       IntakeAlgae(-6),
       IntakeCoral(12),
       HoldCoral(1),
+      ScoreProcessor(6),
       ScoreL1(-12);
 
       public final double voltage;

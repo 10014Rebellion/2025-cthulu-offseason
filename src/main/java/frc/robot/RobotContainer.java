@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.systems.arm.Arm;
 import frc.robot.systems.arm.ArmConstants;
+import frc.robot.systems.controls.ButtonBindings;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.GyroIO;
 import frc.robot.systems.drive.GyroIOPigeon2;
@@ -54,7 +55,7 @@ public class RobotContainer {
   private final Flywheels flywheels;
 
   // Controller
-  private final CommandXboxController driveController = new CommandXboxController(0);
+  private final ButtonBindings mButtonBindings;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -122,9 +123,9 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    mButtonBindings = new ButtonBindings(drive, arm, intake, flywheels);
     // Configure the button bindings
     configureButtonBindings();
-    configureTestBindings();
   }
 
   /**
@@ -133,105 +134,26 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
+
   private void configureButtonBindings() {
-
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -driveController.getLeftY(),
-            () -> -driveController.getLeftX(),
-            () -> driveController.getRightX()));
-
-    // Lock to 0° when A button is held
-    driveController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () -> new Rotation2d()));
-
-    // Reset gyro to 0° when B button is pressed
-    driveController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
+    mButtonBindings.initDriverJoysticks();
+    //mButtonBindings.initDriverButtons();
+    
+    mButtonBindings.initOperatorBindings();
+   
+    mButtonBindings.initTestBindings();
   }
 
-  private void configureTestBindings() {
-    // driveController.rightBumper().whileTrue(arm.setVoltageCommand(6.0));
-    // driveController.leftBumper().whileTrue(arm.setVoltageCommand(-6.0));
-    driveController
-        .rightTrigger()
-        .whileTrue(
-            new SequentialCommandGroup(
-                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.IntakeAlgae.getPos()),
-                new ParallelCommandGroup(
-                    arm.setPIDCmd(ArmConstants.Setpoints.Intake.getPos().getDegrees()),
-                    intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.IntakeAlgae.getPos()),
-                    intake.setRollerVoltageCommand(
-                        IntakeConstants.Roller.Voltage.IntakeAlgae.getVoltage()),
-                    flywheels.setTopFlywheelVoltageCommand(
-                        FlywheelConstants.topFlywheel.Voltage.IntakeAlgae.getVoltage()),
-                    flywheels.setBottomFlywheelVoltageCommand(
-                        FlywheelConstants.bottomFlywheel.Voltage.IntakeAlgae.getVoltage()),
-                    flywheels.setIndexerVoltageCommand(
-                        FlywheelConstants.indexer.Voltage.IndexAlgae.getVoltage()))));
-    driveController
-        .leftTrigger()
-        .whileTrue(
-            new ParallelCommandGroup(
-                flywheels.setTopFlywheelVoltageCommand(
-                    FlywheelConstants.topFlywheel.Voltage.BasicShootAlgae.getVoltage()),
-                flywheels.setBottomFlywheelVoltageCommand(
-                    FlywheelConstants.bottomFlywheel.Voltage.BasicShootAlgae.getVoltage()),
-                flywheels.setIndexerVoltageCommand(2),
-                new SequentialCommandGroup(
-                    arm.setPIDCmd(30.0),
-                    new WaitCommand(0.5),
-                    flywheels.setIndexerVoltageCommand(
-                        FlywheelConstants.indexer.Voltage.FireAlgae.getVoltage()))));
-    driveController
-        .rightBumper()
-        .whileTrue(
-            new ParallelCommandGroup(
-                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.IntakeCoral.getPos()),
-                intake.setRollerVoltageCommand(
-                    IntakeConstants.Roller.Voltage.IntakeCoral.getVoltage())))
-        .whileFalse(
-            new ParallelCommandGroup(
-                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()),
-                intake.setRollerVoltageCommand(
-                    IntakeConstants.Roller.Voltage.HoldCoral.getVoltage())));
+  // private void configureTestBindings() {
 
-    driveController
-        .leftBumper()
-        .whileTrue(
-            new ParallelCommandGroup(
-                intake.intakePivotToGoal(IntakeConstants.Pivot.Setpoints.ScoreL1.getPos()),
-                intake.setRollerVoltageCommand(
-                    IntakeConstants.Roller.Voltage.ScoreL1.getVoltage())));
-    // driveController.x().whileTrue(arm.setTuneablePIDCmd());
-    // driveController.y().whileTrue(arm.enableFFCmd());
+  //   driveController.povRight().whileTrue(intake.setRollerVoltageCommand(6.0));
+  //   driveController.povLeft().whileTrue(intake.setRollerVoltageCommand(-6.0));
+  //   driveController.povUp().whileTrue(intake.setPivotVoltageCommand(1.5));
+  //   driveController.povDown().whileTrue(intake.setPivotVoltageCommand(-1.0));
 
-    // driveController.povRight().whileTrue(intake.setPivotVoltageCommand(3.0));
-    // driveController.povLeft().whileTrue(intake.setPivotVoltageCommand(-3.0));
-
-    driveController.povRight().whileTrue(intake.setRollerVoltageCommand(6.0));
-    driveController.povLeft().whileTrue(intake.setRollerVoltageCommand(-6.0));
-    driveController.povUp().whileTrue(intake.setPivotVoltageCommand(1.5));
-    driveController.povDown().whileTrue(intake.setPivotVoltageCommand(-1.0));
-
-    driveController.x().whileTrue(intake.intakeTunablePivotToGoal());
-    driveController.y().whileTrue(intake.intakePivotFF());
-  }
+  //   driveController.x().whileTrue(intake.intakeTunablePivotToGoal());
+  //   driveController.y().whileTrue(intake.intakePivotFF());
+  // }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

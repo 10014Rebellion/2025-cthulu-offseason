@@ -92,6 +92,7 @@ public class Intake extends SubsystemBase {
     return (pVolts < 0 && getPivotAngleDeg() <= Pivot.kLowerLimitDeg)
         || (pVolts > 0 && getPivotAngleDeg() >= Pivot.kUpperLimitDeg);
   }
+  
 
   public FunctionalCommand setPivotVoltageCommand(double pVolts) {
     return new FunctionalCommand(
@@ -131,7 +132,7 @@ public class Intake extends SubsystemBase {
         this);
   }
 
-  public FunctionalCommand intakePivotToGoal(double pGoalDegrees) {
+  public FunctionalCommand setIntakePivotCmd(double pGoalDegrees) {
     return new FunctionalCommand(
         () -> {
           mPivotController.reset(getPivotAngleDeg());
@@ -174,6 +175,14 @@ public class Intake extends SubsystemBase {
         this);
   }
 
+  public FunctionalCommand intakeCoralCmd() {
+    return new FunctionalCommand(
+      () -> {}, 
+      () -> setRollerVolts(Roller.Voltage.IntakeCoral.getVoltage()), 
+      (interrupted) -> setRollerVolts(Roller.Voltage.HoldCoral.getVoltage()), 
+      () -> hasCoral(), this);
+  }
+
   public double getPivotAngleDeg() {
     if (mPivotEncoder.getPosition() >= 180.0) {
       return mPivotEncoder.getPosition() - 360;
@@ -210,6 +219,7 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Intake/Pivot/Goal", goal);
 
     Logger.recordOutput("Intake/Rollers/Voltage", getRollersVoltage());
+    Logger.recordOutput("Intake/Rollers/Has Coral", hasCoral());
 
     LoggedTunableNumber.ifChanged(
         hashCode(),

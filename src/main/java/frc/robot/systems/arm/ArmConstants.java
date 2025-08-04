@@ -40,18 +40,19 @@ public class ArmConstants {
   public static final SparkMaxConfig kMotorConfig = new SparkMaxConfig();
 
   public enum Setpoints {
-    Hold(Rotation2d.fromDegrees(45)),
-    Intake(Rotation2d.fromDegrees(-40)),
-    L2Algae(Rotation2d.fromDegrees(90)),
-    L3Algae(Rotation2d.fromDegrees(90));
+    Hold(0),
+    Processor(-40),
+    Intake(-40),
+    L2Algae(90),
+    L3Algae(90);
 
-    public final Rotation2d setpoint;
+    public final double setpoint;
 
-    private Setpoints(Rotation2d setpoint) {
+    private Setpoints(double setpoint) {
       this.setpoint = setpoint;
     }
 
-    public Rotation2d getPos() {
+    public double getPos() {
       return this.setpoint;
     }
   };
