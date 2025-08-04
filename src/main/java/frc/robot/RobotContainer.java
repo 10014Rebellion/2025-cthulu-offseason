@@ -122,9 +122,10 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    driveController.leftBumper().whileTrue(flywheels.getFlywheelTopSpeeds(1));
     // Configure the button bindings
-    configureButtonBindings();
-    configureTestBindings();
+    // configureButtonBindings();
+    // configureTestBindings();
   }
 
   /**
