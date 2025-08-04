@@ -5,15 +5,20 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.systems.shooter.ShooterConstants.bottomFlywheel;
-import frc.robot.systems.shooter.ShooterConstants.indexer;
-import frc.robot.systems.shooter.ShooterConstants.topFlywheel;
+import frc.robot.systems.shooter.FlywheelConstants.bottomFlywheel;
+import frc.robot.systems.shooter.FlywheelConstants.indexer;
+import frc.robot.systems.shooter.FlywheelConstants.topFlywheel;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends SubsystemBase {
+  private final ProfiledPIDController mTopController;
+  private final ProfiledPIDController mBottomController;
+
   private final SparkFlex mTopFlywheelMotor;
   // private final RelativeEncoder mTopFlywheelEncoder;
   private final SparkFlex mBottomFlywheelMotor;
@@ -21,6 +26,13 @@ public class Flywheels extends SubsystemBase {
   private final SparkFlex mIndexerMotor;
 
   public Flywheels() {
+    this.mTopController = new ProfiledPIDController(FlywheelConstants.topFlywheel.kP, 0, FlywheelConstants.topFlywheel.kD, 
+    new Constraints(FlywheelConstants.topFlywheel.kMaxVelocity, FlywheelConstants.topFlywheel.kMaxAcceleration));
+    mTopController.setTolerance(topFlywheel.kToleranceRPM);
+    this.mBottomController = new ProfiledPIDController(FlywheelConstants.bottomFlywheel.kP, 0, FlywheelConstants.bottomFlywheel.kD, 
+    new Constraints(FlywheelConstants.bottomFlywheel.kMaxVelocity, FlywheelConstants.bottomFlywheel.kMaxAcceleration));
+    mBottomController.setTolerance(bottomFlywheel.kToleranceRPM);
+   
     this.mTopFlywheelMotor = new SparkFlex(topFlywheel.kMotorID, MotorType.kBrushless);
     this.mTopFlywheelMotor.configure(
         topFlywheel.kMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -76,6 +88,42 @@ public class Flywheels extends SubsystemBase {
         },
         (interrupted) -> setIndexerVoltage(0),
         () -> false);
+  }
+
+  public double getTopFlywheelRPM() {
+    return mTopFlywheelMotor.getEncoder().getVelocity();
+  }
+
+  public double getBottomFlywheelRPM() {
+    return mTopFlywheelMotor.getEncoder().getVelocity();
+  } 
+
+  public FunctionalCommand setTopFlywheelRPM(double pDesiredRPM) {
+    return new FunctionalCommand(
+      () -> {
+        mTopController.reset(getTopFlywheelRPM());
+        mTopController.setGoal(pDesiredRPM);
+      }, 
+      () -> {
+        setTopFlywheelVoltage(mTopController.calculate(getTopFlywheelRPM()));
+      }, 
+      (interrupted) -> {}, 
+      () -> mTopController.atGoal(), 
+    this);
+  }
+
+  public FunctionalCommand setBottomFlywheelRPM(double pDesiredRPM) {
+    return new FunctionalCommand(
+      () -> {
+        mBottomController.reset(getBottomFlywheelRPM());
+        mBottomController.setGoal(pDesiredRPM);
+      }, 
+      () -> {
+        setBottomFlywheelVoltage(mBottomController.calculate(getBottomFlywheelRPM()));
+      }, 
+      (interrupted) -> {}, 
+      () -> mBottomController.atGoal(), 
+    this);
   }
 
   private double clampVoltage(double pVolts) {

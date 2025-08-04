@@ -4,7 +4,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-public class ShooterConstants {
+public class FlywheelConstants {
 
   public class topFlywheel {
     public static final int kMotorID = 32;
@@ -14,6 +14,9 @@ public class ShooterConstants {
     public static final boolean kMotorInverted = false;
     public static final int kCurrentLimit = 60;
 
+    public static final int kMaxRPM = 6204; // Measured empirically with 2 second accel timer, increase if shots are too weak 
+
+    public static final double kToleranceRPM = 50;
     public static final double kP = 0.0;
     public static final double kD = 0.0;
     public static final double kMaxVelocity = 0.0;
@@ -54,6 +57,9 @@ public class ShooterConstants {
     public static final boolean kMotorInverted = true;
     public static final int kCurrentLimit = 60;
 
+    public static final int kMaxRPM = 6284; // Measured empirically with 2 second accel timer, increase if shots are too weak 
+
+    public static final double kToleranceRPM = 50;
     public static final double kP = 0.0;
     public static final double kD = 0.0;
     public static final double kMaxVelocity = 0.0;
