@@ -205,8 +205,6 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (isAtLimit(getPivotVoltage())) stopPivotMotor();
-
     Logger.recordOutput("Intake/Pivot/Voltage", getPivotVoltage());
     Logger.recordOutput("Intake/Pivot/Posistion", getPivotAngleDeg());
     Logger.recordOutput("Intake/Pivot/Goal", goal);
@@ -237,5 +235,7 @@ public class Intake extends SubsystemBase {
         },
         nTuneableVelocity,
         nTuneableAccel);
+
+    if (isAtLimit(getPivotVoltage())) stopPivotMotor();
   }
 }

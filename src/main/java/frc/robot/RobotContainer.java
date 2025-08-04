@@ -37,7 +37,7 @@ import frc.robot.systems.drive.ModuleIOSpark;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.shooter.Flywheels;
-import frc.robot.systems.shooter.ShooterConstants;
+import frc.robot.systems.shooter.FlywheelConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -179,25 +179,25 @@ public class RobotContainer {
                     intake.setRollerVoltageCommand(
                         IntakeConstants.Roller.Voltage.IntakeAlgae.getVoltage()),
                     flywheels.setTopFlywheelVoltageCommand(
-                        ShooterConstants.topFlywheel.Voltage.IntakeAlgae.getVoltage()),
+                        FlywheelConstants.topFlywheel.Voltage.IntakeAlgae.getVoltage()),
                     flywheels.setBottomFlywheelVoltageCommand(
-                        ShooterConstants.bottomFlywheel.Voltage.IntakeAlgae.getVoltage()),
+                        FlywheelConstants.bottomFlywheel.Voltage.IntakeAlgae.getVoltage()),
                     flywheels.setIndexerVoltageCommand(
-                        ShooterConstants.indexer.Voltage.IndexAlgae.getVoltage()))));
+                        FlywheelConstants.indexer.Voltage.IndexAlgae.getVoltage()))));
     driveController
         .leftTrigger()
         .whileTrue(
             new ParallelCommandGroup(
                 flywheels.setTopFlywheelVoltageCommand(
-                    ShooterConstants.topFlywheel.Voltage.BasicShootAlgae.getVoltage()),
+                    FlywheelConstants.topFlywheel.Voltage.BasicShootAlgae.getVoltage()),
                 flywheels.setBottomFlywheelVoltageCommand(
-                    ShooterConstants.bottomFlywheel.Voltage.BasicShootAlgae.getVoltage()),
+                    FlywheelConstants.bottomFlywheel.Voltage.BasicShootAlgae.getVoltage()),
                 flywheels.setIndexerVoltageCommand(2),
                 new SequentialCommandGroup(
                     arm.setPIDCmd(30.0),
                     new WaitCommand(0.5),
                     flywheels.setIndexerVoltageCommand(
-                        ShooterConstants.indexer.Voltage.FireAlgae.getVoltage()))));
+                        FlywheelConstants.indexer.Voltage.FireAlgae.getVoltage()))));
     driveController
         .rightBumper()
         .whileTrue(
