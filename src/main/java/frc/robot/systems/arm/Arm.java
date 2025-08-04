@@ -192,16 +192,19 @@ public class Arm extends SubsystemBase {
     controller.setP(kP);
     controller.setI(kI);
     controller.setD(kD);
+    System.out.println("Updating PID Values");
   }
 
   public void setConstraints(double kMaxVelo, double kMaxAccel) {
     controller.setConstraints(new Constraints(kMaxVelo, kMaxAccel));
+    System.out.println("Updating PID Constraints");
   }
 
   public void setFF(double kS, double kV, double kG) {
     feedforward.setKg(kG);
     feedforward.setKv(kV);
     feedforward.setKs(kS);
+    System.out.println("Updating FF Values");
   }
 
   @Override

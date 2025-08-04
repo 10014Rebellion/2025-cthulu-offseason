@@ -27,14 +27,26 @@ public class Flywheels extends SubsystemBase {
   private final DigitalInput mAlgaeSensor;
 
   public Flywheels() {
-    this.mTopController = new ProfiledPIDController(FlywheelConstants.topFlywheel.kP, 0, FlywheelConstants.topFlywheel.kD, 
-    new Constraints(FlywheelConstants.topFlywheel.kMaxVelocity, FlywheelConstants.topFlywheel.kMaxAcceleration));
+    this.mTopController =
+        new ProfiledPIDController(
+            FlywheelConstants.topFlywheel.kP,
+            0,
+            FlywheelConstants.topFlywheel.kD,
+            new Constraints(
+                FlywheelConstants.topFlywheel.kMaxVelocity,
+                FlywheelConstants.topFlywheel.kMaxAcceleration));
     mTopController.setTolerance(topFlywheel.kToleranceRPM);
 
-    this.mBottomController = new ProfiledPIDController(FlywheelConstants.bottomFlywheel.kP, 0, FlywheelConstants.bottomFlywheel.kD, 
-    new Constraints(FlywheelConstants.bottomFlywheel.kMaxVelocity, FlywheelConstants.bottomFlywheel.kMaxAcceleration));
+    this.mBottomController =
+        new ProfiledPIDController(
+            FlywheelConstants.bottomFlywheel.kP,
+            0,
+            FlywheelConstants.bottomFlywheel.kD,
+            new Constraints(
+                FlywheelConstants.bottomFlywheel.kMaxVelocity,
+                FlywheelConstants.bottomFlywheel.kMaxAcceleration));
     mBottomController.setTolerance(bottomFlywheel.kToleranceRPM);
-   
+
     this.mTopFlywheelMotor = new SparkFlex(topFlywheel.kMotorID, MotorType.kBrushless);
     this.mTopFlywheelMotor.configure(
         topFlywheel.kMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -94,7 +106,8 @@ public class Flywheels extends SubsystemBase {
         () -> false);
   }
 
-  public FunctionalCommand setAllVoltageCommand(double topVolts, double bottomVolts, double indexerVolts) {
+  public FunctionalCommand setAllVoltageCommand(
+      double topVolts, double bottomVolts, double indexerVolts) {
     return new FunctionalCommand(
         () -> {},
         () -> {
@@ -130,7 +143,7 @@ public class Flywheels extends SubsystemBase {
 
   public double getBottomFlywheelRPM() {
     return mTopFlywheelMotor.getEncoder().getVelocity();
-  } 
+  }
 
   public boolean getAlgaeDetected() {
     return !mAlgaeSensor.get();
@@ -138,36 +151,45 @@ public class Flywheels extends SubsystemBase {
 
   public FunctionalCommand setTopFlywheelRPM(double pDesiredRPM) {
     return new FunctionalCommand(
-      () -> {
-        mTopController.reset(getTopFlywheelRPM());
-        mTopController.setGoal(MathUtil.clamp(pDesiredRPM, -topFlywheel.kMaxRPM, topFlywheel.kMaxRPM));
-        if (pDesiredRPM > topFlywheel.kMaxRPM) {
-          DriverStation.reportWarning("SETPOINT RPM " + pDesiredRPM + "EXCEEDS THE MAXIMUM RPM OF " + topFlywheel.kMaxRPM, true);
-        }
-      }, 
-      () -> {
-        setTopFlywheelVoltage(mTopController.calculate(getTopFlywheelRPM()));
-      }, 
-      (interrupted) -> {}, 
-      () -> mTopController.atGoal(), 
-    this);
+        () -> {
+          mTopController.reset(getTopFlywheelRPM());
+          mTopController.setGoal(
+              MathUtil.clamp(pDesiredRPM, -topFlywheel.kMaxRPM, topFlywheel.kMaxRPM));
+          if (pDesiredRPM > topFlywheel.kMaxRPM) {
+            DriverStation.reportWarning(
+                "SETPOINT RPM " + pDesiredRPM + "EXCEEDS THE MAXIMUM RPM OF " + topFlywheel.kMaxRPM,
+                true);
+          }
+        },
+        () -> {
+          setTopFlywheelVoltage(mTopController.calculate(getTopFlywheelRPM()));
+        },
+        (interrupted) -> {},
+        () -> mTopController.atGoal(),
+        this);
   }
 
   public FunctionalCommand setBottomFlywheelRPM(double pDesiredRPM) {
     return new FunctionalCommand(
-      () -> {
-        mBottomController.reset(getBottomFlywheelRPM());
-        mBottomController.setGoal(MathUtil.clamp(pDesiredRPM, -bottomFlywheel.kMaxRPM, bottomFlywheel.kMaxRPM));
-        if (pDesiredRPM > bottomFlywheel.kMaxRPM) {
-          DriverStation.reportWarning("SETPOINT RPM " + pDesiredRPM + "EXCEEDS THE MAXIMUM RPM OF " + bottomFlywheel.kMaxRPM, true);
-        }
-      }, 
-      () -> {
-        setBottomFlywheelVoltage(mBottomController.calculate(getBottomFlywheelRPM()));
-      }, 
-      (interrupted) -> {}, 
-      () -> mBottomController.atGoal(), 
-    this);
+        () -> {
+          mBottomController.reset(getBottomFlywheelRPM());
+          mBottomController.setGoal(
+              MathUtil.clamp(pDesiredRPM, -bottomFlywheel.kMaxRPM, bottomFlywheel.kMaxRPM));
+          if (pDesiredRPM > bottomFlywheel.kMaxRPM) {
+            DriverStation.reportWarning(
+                "SETPOINT RPM "
+                    + pDesiredRPM
+                    + "EXCEEDS THE MAXIMUM RPM OF "
+                    + bottomFlywheel.kMaxRPM,
+                true);
+          }
+        },
+        () -> {
+          setBottomFlywheelVoltage(mBottomController.calculate(getBottomFlywheelRPM()));
+        },
+        (interrupted) -> {},
+        () -> mBottomController.atGoal(),
+        this);
   }
 
   private double clampVoltage(double pVolts) {

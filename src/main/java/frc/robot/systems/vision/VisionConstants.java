@@ -63,11 +63,15 @@ public class VisionConstants {
    * https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2025-build-thread/477314/85
    */
 
-   // Tuned by using AdvantageScope data analysis tool(Normal distribution)
-  public static final Vector<N3> kSingleStdDevs = (RobotBase.isReal()) ?
-      VecBuilder.fill(0.274375, 0.274375, 5.0) : VecBuilder.fill(0.23, 0.23, 5.0);
-  public static final Vector<N3> kMultiStdDevs = (RobotBase.isReal()) ?
-      VecBuilder.fill(0.23188, 0.23188, 5.0) : VecBuilder.fill(0.23, 0.23, 5.0);
+  // Tuned by using AdvantageScope data analysis tool(Normal distribution)
+  public static final Vector<N3> kSingleStdDevs =
+      (RobotBase.isReal())
+          ? VecBuilder.fill(0.274375, 0.274375, 5.0)
+          : VecBuilder.fill(0.23, 0.23, 5.0);
+  public static final Vector<N3> kMultiStdDevs =
+      (RobotBase.isReal())
+          ? VecBuilder.fill(0.23188, 0.23188, 5.0)
+          : VecBuilder.fill(0.23, 0.23, 5.0);
 
   public static final double kAmbiguityThreshold = (RobotBase.isReal()) ? 0.2 : 1.0;
 

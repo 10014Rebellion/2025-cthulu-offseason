@@ -14,7 +14,8 @@ public class FlywheelConstants {
     public static final boolean kMotorInverted = false;
     public static final int kCurrentLimit = 60;
 
-    public static final int kMaxRPM = 6204; // Measured empirically with 2 second accel timer, increase if shots are too weak 
+    public static final int kMaxRPM =
+        6204; // Measured empirically with 2 second accel timer, increase if shots are too weak
 
     public static final double kToleranceRPM = 50;
     public static final double kP = 0.0;
@@ -58,7 +59,8 @@ public class FlywheelConstants {
     public static final boolean kMotorInverted = true;
     public static final int kCurrentLimit = 60;
 
-    public static final int kMaxRPM = 6284; // Measured empirically with 2 second accel timer, increase if shots are too weak 
+    public static final int kMaxRPM =
+        6284; // Measured empirically with 2 second accel timer, increase if shots are too weak
 
     public static final double kToleranceRPM = 50;
     public static final double kP = 0.0;

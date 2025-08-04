@@ -3,7 +3,6 @@ package frc.robot.systems.arm;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.geometry.Rotation2d;
 
 public class ArmConstants {
   public static int kMotorID = 31;
@@ -13,7 +12,7 @@ public class ArmConstants {
   public static boolean kMotorInverted = false;
   public static int kCurrentLimit = 60;
 
-  public static double kP = 0.8;
+  public static double kP = 0.0; // 0.8
   public static double kI = 0.0;
   public static double kD = 0.0;
 
@@ -31,10 +30,10 @@ public class ArmConstants {
   public static double kPositionConversionFactor = 360.0;
   public static double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
 
-  public static double kS = 3.0;
-  public static double kG = 0.5;
-  public static double kV = 40.0;
-  public static double kA = 0.0;
+  public static double kS = 0.0; // 3
+  public static double kG = 0.85; // Volts 0.5
+  public static double kV = 2.08; // Volts*s/radians 40
+  public static double kA = 0.24; // Volts*s^2/radians 0
   // Calculated kG: 0.24, kV: 39.18, kA: 0.06
 
   public static final SparkMaxConfig kMotorConfig = new SparkMaxConfig();

@@ -92,7 +92,6 @@ public class Intake extends SubsystemBase {
     return (pVolts < 0 && getPivotAngleDeg() <= Pivot.kLowerLimitDeg)
         || (pVolts > 0 && getPivotAngleDeg() >= Pivot.kUpperLimitDeg);
   }
-  
 
   public FunctionalCommand setPivotVoltageCommand(double pVolts) {
     return new FunctionalCommand(
@@ -177,10 +176,11 @@ public class Intake extends SubsystemBase {
 
   public FunctionalCommand intakeCoralCmd() {
     return new FunctionalCommand(
-      () -> {}, 
-      () -> setRollerVolts(Roller.Voltage.IntakeCoral.getVoltage()), 
-      (interrupted) -> setRollerVolts(Roller.Voltage.HoldCoral.getVoltage()), 
-      () -> hasCoral(), this);
+        () -> {},
+        () -> setRollerVolts(Roller.Voltage.IntakeCoral.getVoltage()),
+        (interrupted) -> setRollerVolts(Roller.Voltage.HoldCoral.getVoltage()),
+        () -> hasCoral(),
+        this);
   }
 
   public double getPivotAngleDeg() {

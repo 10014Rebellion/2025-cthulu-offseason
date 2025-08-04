@@ -14,20 +14,12 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.systems.arm.Arm;
-import frc.robot.systems.arm.ArmConstants;
 import frc.robot.systems.controls.ButtonBindings;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.GyroIO;
@@ -36,9 +28,7 @@ import frc.robot.systems.drive.ModuleIO;
 import frc.robot.systems.drive.ModuleIOSim;
 import frc.robot.systems.drive.ModuleIOSpark;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.shooter.Flywheels;
-import frc.robot.systems.shooter.FlywheelConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -101,6 +91,7 @@ public class RobotContainer {
     }
 
     arm = new Arm();
+    arm.setDefaultCommand(arm.enableFFCmd());
     intake = new Intake();
     flywheels = new Flywheels();
 
@@ -134,13 +125,12 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-
   private void configureButtonBindings() {
     mButtonBindings.initDriverJoysticks();
-    //mButtonBindings.initDriverButtons();
-    
+    // mButtonBindings.initDriverButtons();
+
     mButtonBindings.initOperatorBindings();
-   
+
     mButtonBindings.initTestBindings();
   }
 
