@@ -12,14 +12,14 @@ public class ArmConstants {
   public static boolean kMotorInverted = false;
   public static int kCurrentLimit = 60;
 
-  public static double kP = 0.0; // 0.8
+  public static double kP = 0.45; // 0.8
   public static double kI = 0.0;
   public static double kD = 0.0;
 
-  public static double kMaxAcceleration = 2000;
-  public static double kMaxVelocity = 700;
+  public static double kMaxAcceleration = 500; // Was 2000
+  public static double kMaxVelocity = 300; // Was 700
 
-  public static double kTolerance = 1.0;
+  public static double kTolerance = 1.0; // Can be reduced
 
   public static double kUpperLimitDeg = 80; // Mechanical Limit: 90
   public static double kLowerLimitDeg = -37; // Mechanical Limit: -40
@@ -29,10 +29,11 @@ public class ArmConstants {
 
   public static double kPositionConversionFactor = 360.0;
   public static double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
+  public static double kCGOffsetDeg = 34;
 
-  public static double kS = 0.0; // 3
-  public static double kG = 0.85; // Volts 0.5
-  public static double kV = 2.08; // Volts*s/radians 40
+  public static double kS = 0.1; // Calculated:
+  public static double kG = 0.55; // Volts 0.5
+  public static double kV = 0.2; // Volts*s/radians 40
   public static double kA = 0.24; // Volts*s^2/radians 0
   // Calculated kG: 0.24, kV: 39.18, kA: 0.06
 

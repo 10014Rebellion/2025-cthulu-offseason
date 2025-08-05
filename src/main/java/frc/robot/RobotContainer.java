@@ -29,6 +29,12 @@ import frc.robot.systems.drive.ModuleIOSim;
 import frc.robot.systems.drive.ModuleIOSpark;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.Flywheels;
+import frc.robot.systems.vision.CameraIO;
+import frc.robot.systems.vision.CameraIOPV;
+import frc.robot.systems.vision.Vision;
+import frc.robot.systems.vision.VisionConstants;
+import frc.robot.systems.vision.VisionConstants.Orientation;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -61,7 +67,10 @@ public class RobotContainer {
                 new ModuleIOSpark(0),
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
-                new ModuleIOSpark(3));
+                new ModuleIOSpark(3),
+                new Vision(new CameraIO[] {
+                    new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.FRONT)
+                }));
 
         break;
 

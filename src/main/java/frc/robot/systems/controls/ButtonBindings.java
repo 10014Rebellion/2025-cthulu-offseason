@@ -3,6 +3,7 @@ package frc.robot.systems.controls;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.systems.arm.Arm;
@@ -78,19 +79,30 @@ public class ButtonBindings {
 
   // All bindings for running certain commands that aren't ready for "competition" use yet go here.
   public void initTestBindings() {
-    mDriverController.b().whileTrue(mTeleopCommands.scoreProcessorCmd());
+    // mDriverController.b().whileTrue(mTeleopCommands.scoreProcessorCmd());
 
     mDriverController.povUp().whileTrue(mArm.setVoltageCommand(3));
 
     mDriverController.povDown().whileTrue(mArm.setVoltageCommand(-3));
 
-    mDriverController.y().whileTrue(mArm.setTuneablePIDCmd());
+    // mDriverController.y().whileTrue(mArm.setPIDCmd(45));
 
-    mDriverController.a().whileTrue(mArm.enableFFCmd());
+    // mDriverController.x().whileTrue(mArm.setPIDCmd(0));
 
-    mDriverController.rightBumper().whileTrue(mIntake.intakeCoralCmd());
+    // mDriverController.a().whileTrue(mArm.setPIDCmd(-30));
 
-    mDriverController.rightTrigger().whileTrue(mFlywheels.setTopFlywheelRPM(6000));
-    mDriverController.leftTrigger().whileTrue(mFlywheels.setBottomFlywheelRPM(6000));
+    mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
+    mDriverController.rightTrigger().whileTrue(mFlywheels.setIndexerVoltageCommand(-12));
+
+    mDriverController.y().whileTrue(
+        mFlywheels.setTuneableRPM());
+    mDriverController.a().whileTrue(
+      new ParallelCommandGroup(
+        mFlywheels.setTopFlywheelRPM(3000),
+        mFlywheels.setBottomFlywheelRPM(3000)
+    ));
+    //mDriverController.b().whileTrue(mFlywheels.setBottomFlywheelRPM(6000));
+    mDriverController.x().whileTrue(mArm.setTuneablePIDCmd());
+    //mDriverController.a().whileTrue(mFlywheels.setBottomFlywheelRPM(3000));
   }
 }

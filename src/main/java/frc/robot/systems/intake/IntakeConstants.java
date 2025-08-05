@@ -33,13 +33,13 @@ public class IntakeConstants {
     public static final double kUpperLimitDeg = 70;
     public static final double kTolerance = 5.0;
 
-    public static final double kP = 0.0;
+    public static final double kP = 0.1;
     public static final double kD = 0.0;
     public static final double kMaxVelocity = 0.0;
     public static final double kMaxAcceleration = 0.0;
 
     public static final double kS = 0.0;
-    public static final double kG = 0.0;
+    public static final double kG = 0.4;
     public static final double kV = 0.0;
     public static final double kA = 0.0;
 
@@ -48,7 +48,7 @@ public class IntakeConstants {
     public static final double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
 
     public enum Setpoints {
-      IntakeAlgae(15),
+      IntakeAlgae(26),
       IntakeCoral(-25),
       Processor(30),
       AvoidArm(45),

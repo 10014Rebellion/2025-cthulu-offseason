@@ -39,6 +39,7 @@ public class Arm extends SubsystemBase {
       new LoggedTunableNumber("Arm/Tuneables/kG", ArmConstants.kG);
   private LoggedTunableNumber nTuneableSetpoint =
       new LoggedTunableNumber("Arm/Tuneables/Setpoint", 0.0);
+  private double trackedSetpoint = 0.0;
 
   private ProfiledPIDController controller =
       new ProfiledPIDController(
@@ -69,8 +70,8 @@ public class Arm extends SubsystemBase {
 
   public double getPosistionDegrees() {
     if (mArmMotor.getAbsoluteEncoder().getPosition() >= 180.0) {
-      return mArmMotor.getAbsoluteEncoder().getPosition() - 360;
-    } else return mArmMotor.getAbsoluteEncoder().getPosition();
+      return mArmMotor.getAbsoluteEncoder().getPosition() - 1 - 360;
+    } else return mArmMotor.getAbsoluteEncoder().getPosition() - 1;
   }
 
   public double getPosistionRadians() {
@@ -107,6 +108,10 @@ public class Arm extends SubsystemBase {
         || (pVolts > 0 && getPosistionDegrees() >= ArmConstants.kUpperLimitDeg);
   }
 
+  private double getFFangle() {
+    return Units.degreesToRadians(getPosistionDegrees() + ArmConstants.kCGOffsetDeg);
+  }
+
   public FunctionalCommand setVoltageCommand(double pVolts) {
     return new FunctionalCommand(
         () -> {},
@@ -125,10 +130,10 @@ public class Arm extends SubsystemBase {
           System.out.println("Arm FF Running");
         },
         () -> {
-          double calculatedOutput = feedforward.calculate(getPosistionRadians(), 0);
+          double calculatedOutput = feedforward.calculate(getFFangle(), 0);
           setVoltage(calculatedOutput);
         },
-        (interrupted) -> setVoltage(feedforward.calculate(getPosistionRadians(), 0)),
+        (interrupted) -> setVoltage(0.0),
         () -> false,
         this);
   }
@@ -142,19 +147,21 @@ public class Arm extends SubsystemBase {
         () -> {
           controller.reset(getPosistionDegrees());
           controller.setGoal(pSetpoint);
+          trackedSetpoint = pSetpoint;
         },
         () -> {
           double encoderReading = getPosistionDegrees();
           double calculatedPID = controller.calculate(encoderReading);
           double calculatedFF =
               feedforward.calculate(
-                  Units.degreesToRadians(controller.getSetpoint().position),
+                  Units.degreesToRadians(
+                      controller.getSetpoint().position + ArmConstants.kCGOffsetDeg),
                   Units.degreesToRadians(controller.getSetpoint().velocity));
 
           setVoltage(calculatedPID + calculatedFF);
-          // SmartDashboard.putNumber("Wrist/Full Output", calculatedPID + calculatedFF);
-          // SmartDashboard.putNumber("Wrist/PID Output", calculatedPID);
-          // SmartDashboard.putNumber("Wrist/FF Output", calculatedFF);
+          Logger.recordOutput("Arm/Full Output", calculatedPID + calculatedFF);
+          Logger.recordOutput("Arm/PID Output", calculatedPID);
+          Logger.recordOutput("Arm/FF Output", calculatedFF);
         },
         (interrupted) -> setVoltage(0),
         () -> isPIDAtGoal(),
@@ -172,7 +179,8 @@ public class Arm extends SubsystemBase {
           double calculatedPID = controller.calculate(encoderReading);
           double calculatedFF =
               feedforward.calculate(
-                  Units.degreesToRadians(controller.getSetpoint().position),
+                  Units.degreesToRadians(
+                      controller.getSetpoint().position + ArmConstants.kCGOffsetDeg),
                   Units.degreesToRadians(controller.getSetpoint().velocity));
 
           setVoltage(calculatedPID + calculatedFF);
@@ -184,7 +192,7 @@ public class Arm extends SubsystemBase {
           // SmartDashboard.putNumber("Wrist/FF Output", calculatedFF);
         },
         (interrupted) -> setVoltage(0),
-        () -> isPIDAtGoal(),
+        () -> false, // isPIDAtGoal(),
         this);
   }
 
@@ -215,6 +223,7 @@ public class Arm extends SubsystemBase {
     Logger.recordOutput("Arm/OutputAmps", getOutputAmps());
     Logger.recordOutput("Arm/Posistion", getPosistionDegrees());
     Logger.recordOutput("Arm/Within Tolerance", isPIDAtGoal());
+    Logger.recordOutput("Arm/Setpoint", trackedSetpoint);
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {

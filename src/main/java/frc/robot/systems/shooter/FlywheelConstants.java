@@ -5,35 +5,30 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 public class FlywheelConstants {
-
+  public static final double bottomMultipler = 0.85;
   public class topFlywheel {
     public static final int kMotorID = 32;
 
     public static final MotorType kMotorType = MotorType.kBrushless;
     public static final IdleMode kIdleMode = IdleMode.kCoast;
-    public static final boolean kMotorInverted = false;
+    public static final boolean kMotorInverted = true;
     public static final int kCurrentLimit = 60;
 
     public static final int kMaxRPM =
         6204; // Measured empirically with 2 second accel timer, increase if shots are too weak
 
     public static final double kToleranceRPM = 50;
-    public static final double kP = 0.0;
+    public static final double kP = 0.0001;
     public static final double kD = 0.0;
-    public static final double kMaxVelocity = 0.0;
-    public static final double kMaxAcceleration = 0.0;
 
-    public static final double kS = 0.0;
-    public static final double kG = 0.0;
-    public static final double kV = 0.0;
-    public static final double kA = 0.0;
+    public static final double kFF = 0.00016;
 
     public static final SparkFlexConfig kMotorConfig = new SparkFlexConfig();
 
     public enum Voltage {
-      IntakeAlgae(6),
-      scoreProcessor(-6),
-      BasicShootAlgae(-12);
+      IntakeAlgae(-6),
+      scoreProcessor(6),
+      BasicShootAlgae(12);
 
       public final double voltage;
 
@@ -48,6 +43,7 @@ public class FlywheelConstants {
 
     static {
       kMotorConfig.idleMode(kIdleMode).smartCurrentLimit(kCurrentLimit).inverted(kMotorInverted);
+      kMotorConfig.closedLoop.p(kP).d(kD).velocityFF(kFF);
     }
   }
 
@@ -56,29 +52,24 @@ public class FlywheelConstants {
 
     public static final MotorType kMotorType = MotorType.kBrushless;
     public static final IdleMode kIdleMode = IdleMode.kCoast;
-    public static final boolean kMotorInverted = true;
+    public static final boolean kMotorInverted = false;
     public static final int kCurrentLimit = 60;
 
     public static final int kMaxRPM =
         6284; // Measured empirically with 2 second accel timer, increase if shots are too weak
 
     public static final double kToleranceRPM = 50;
-    public static final double kP = 0.0;
+    public static final double kP = 0.0001;
     public static final double kD = 0.0;
-    public static final double kMaxVelocity = 0.0;
-    public static final double kMaxAcceleration = 0.0;
 
-    public static final double kS = 0.0;
-    public static final double kG = 0.0;
-    public static final double kV = 0.0;
-    public static final double kA = 0.0;
+    public static final double kFF = 0.00016;
 
     public static final SparkFlexConfig kMotorConfig = new SparkFlexConfig();
 
     public enum Voltage {
-      IntakeAlgae(6),
-      scoreProcessor(-6),
-      BasicShootAlgae(-12);
+      IntakeAlgae(-6),
+      scoreProcessor(6),
+      BasicShootAlgae(12);
 
       public final double voltage;
 
@@ -93,6 +84,7 @@ public class FlywheelConstants {
 
     static {
       kMotorConfig.idleMode(kIdleMode).smartCurrentLimit(kCurrentLimit).inverted(kMotorInverted);
+      kMotorConfig.closedLoop.p(kP).d(kD).velocityFF(kFF);
     }
   }
 

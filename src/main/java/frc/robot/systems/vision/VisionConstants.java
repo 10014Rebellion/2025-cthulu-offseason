@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public class VisionConstants {
   // From CAD and decided by you in configuration
-  public static final String kLeftCamName = "";
+  public static final String kLeftCamName = "FrontLeftOV9281";
   public static final Orientation kLeftCamOrientation = Orientation.BACK;
   public static final Transform3d kLeftCamTransform =
       new Transform3d(
