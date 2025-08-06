@@ -122,11 +122,11 @@ public class Intake extends SubsystemBase {
         () -> {
           mPivotController.setGoal(getPivotAngleDeg());
           setPivotVolts(
-              mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg()), 0.0));
+              mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg() + Pivot.kCGAngleOffset), 0.0));
         },
         (interrupted) ->
             setPivotVolts(
-                mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg()), 0.0)),
+                mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg() + Pivot.kCGAngleOffset), 0.0)),
         () -> false,
         this);
   }
@@ -141,13 +141,13 @@ public class Intake extends SubsystemBase {
             setPivotVolts(
                 mPivotController.calculate(getPivotAngleDeg())
                     + mPivotFeedforward.calculate(
-                        Units.degreesToRadians(getPivotAngleDeg()),
+                        Units.degreesToRadians(mPivotController.getSetpoint().position + Pivot.kCGAngleOffset),
                         Units.degreesToRadians(mPivotController.getSetpoint().velocity))),
         (interrupted) ->
             setPivotVolts(
                 mPivotFeedforward.calculate(
-                    Units.degreesToRadians(getPivotAngleDeg()),
-                    Units.degreesToRadians(mPivotController.getSetpoint().velocity))),
+                    Units.degreesToRadians(getPivotAngleDeg() + Pivot.kCGAngleOffset),
+                    0.0)),
         () -> mPivotController.atGoal(),
         this);
   }
@@ -162,15 +162,15 @@ public class Intake extends SubsystemBase {
           double PIDoutput = mPivotController.calculate(getPivotAngleDeg());
           double FFoutput =
               mPivotFeedforward.calculate(
-                  Units.degreesToRadians(mPivotController.getSetpoint().position),
+                  Units.degreesToRadians(mPivotController.getSetpoint().position + Pivot.kCGAngleOffset),
                   Units.degreesToRadians(mPivotController.getSetpoint().velocity));
           setPivotVolts(PIDoutput + FFoutput);
-          Logger.recordOutput("Intake/Full Output", PIDoutput + FFoutput);
-          Logger.recordOutput("Intake/PID Output", PIDoutput);
-          Logger.recordOutput("Intake/FF Output", FFoutput);
+          Logger.recordOutput("Intake/Pivot/Full Output", PIDoutput + FFoutput);
+          Logger.recordOutput("Intake/Pivot/PID Output", PIDoutput);
+          Logger.recordOutput("Intake/Pivot/FF Output", FFoutput);
         },
         (interrupted) -> setPivotVolts(0.0),
-        () -> mPivotController.atGoal(),
+        () -> false,
         this);
   }
 
@@ -179,8 +179,7 @@ public class Intake extends SubsystemBase {
         () -> {},
         () -> setRollerVolts(Roller.Voltage.IntakeCoral.getVoltage()),
         (interrupted) -> setRollerVolts(Roller.Voltage.HoldCoral.getVoltage()),
-        () -> hasCoral(),
-        this);
+        () -> hasCoral());
   }
 
   public double getPivotAngleDeg() {
@@ -215,12 +214,14 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     Logger.recordOutput("Intake/Pivot/Voltage", getPivotVoltage());
+    Logger.recordOutput("Intake/Pivot/AppliedOutput", mPivotMotor.getAppliedOutput());
     Logger.recordOutput("Intake/Pivot/Posistion", getPivotAngleDeg());
     Logger.recordOutput("Intake/Pivot/Goal", goal);
 
     Logger.recordOutput("Intake/Rollers/Voltage", getRollersVoltage());
     Logger.recordOutput("Intake/Rollers/Has Coral", hasCoral());
-
+    Logger.recordOutput("Intake/Rollers/CAN Range/Distance", mCANRange.getDistance().getValueAsDouble());
+    Logger.recordOutput("Intake/Rollers/CAN Range/Detects Object", mCANRange.getIsDetected().getValue());
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {

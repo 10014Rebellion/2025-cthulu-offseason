@@ -29,34 +29,34 @@ import edu.wpi.first.wpilibj.RobotBase;
 public class VisionConstants {
   // From CAD and decided by you in configuration
   public static final String kLeftCamName = "FrontLeftOV9281";
-  public static final Orientation kLeftCamOrientation = Orientation.BACK;
+  public static final Orientation kLeftCamOrientation = Orientation.FRONT;
   public static final Transform3d kLeftCamTransform =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(8.25), // X: inches forward
-              Units.inchesToMeters(12.75), // Y: inches left
-              Units.inchesToMeters(8.875) // Z: inches above ground
+              Units.inchesToMeters(9.2055), // X: inches forward
+              Units.inchesToMeters(13.04025), // Y: inches left
+              Units.inchesToMeters(9.02406) // Z: inches above ground
               ),
           new Rotation3d(
               Units.degreesToRadians(0), // Roll: No side tilt
               Units.degreesToRadians(0), // Pitch: No upward tilt
-              Units.degreesToRadians(30) // Yaw: (angled inward)
+              Units.degreesToRadians(52.5) // Yaw: (angled inward)
               ));
 
-  // public static final String kRightCamName = "";
-  // public static final Orientation kRightCamOrientation = Orientation.BACK;
-  // public static final Transform3d kRightCamTransform = new Transform3d(
-  //     new Translation3d(
-  //         Units.inchesToMeters(), // X: inches forward
-  //         Units.inchesToMeters(), // Y: inches right
-  //         Units.inchesToMeters() // Z: inches above ground
-  //     ),
-  //     new Rotation3d(
-  //         Units.degreesToRadians(), // Roll: No side tilt
-  //         Units.degreesToRadians(), // Pitch: No upward tilt
-  //         Units.degreesToRadians() // Yaw: (angled inward)
-  //     )
-  // );
+  public static final String kRightCamName = "BackRightOV9281";
+  public static final Orientation kRightCamOrientation = Orientation.FRONT;
+  public static final Transform3d kRightCamTransform = new Transform3d(
+      new Translation3d(
+          Units.inchesToMeters(-7.69372), // X: inches forward
+          Units.inchesToMeters(-13.0520), // Y: inches left
+          Units.inchesToMeters(10.02406) // Z: inches above ground
+      ),
+      new Rotation3d(
+          Units.degreesToRadians(0), // Roll: No side tilt
+          Units.degreesToRadians(0), // Pitch: No upward tilt
+          Units.degreesToRadians(217.5) // Yaw: (angled inward)
+      )
+  );
 
   /* TODO: SET TO FALSE UNLESS YOU ACTUALLY KNOW WHAT THIS DOES
    * This turns on a implementation of single tag vision algorithm that may be more accurate

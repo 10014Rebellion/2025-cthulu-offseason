@@ -69,7 +69,8 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3),
                 new Vision(new CameraIO[] {
-                    new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.FRONT)
+                    new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform,  VisionConstants.kLeftCamOrientation),
+                    new CameraIOPV(VisionConstants.kRightCamName, VisionConstants.kRightCamTransform, VisionConstants.kRightCamOrientation)
                 }));
 
         break;
@@ -102,6 +103,7 @@ public class RobotContainer {
     arm = new Arm();
     arm.setDefaultCommand(arm.enableFFCmd());
     intake = new Intake();
+    intake.setDefaultCommand(intake.intakePivotFF());
     flywheels = new Flywheels();
 
     // Set up auto routines

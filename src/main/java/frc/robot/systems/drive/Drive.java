@@ -72,7 +72,8 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-  private SwerveDriveOdometry odometry;
+  private SwerveDriveOdometry odometry = 
+      new SwerveDriveOdometry(kinematics, rawGyroRotation, lastModulePositions);
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
@@ -126,8 +127,6 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-
-    odometry = new SwerveDriveOdometry(new SwerveDriveKinematics(moduleTranslations), getRotation(), getModulePositions());
   }
 
   public Drive(
@@ -182,8 +181,6 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-
-    odometry = new SwerveDriveOdometry(new SwerveDriveKinematics(moduleTranslations), getRotation(), getModulePositions());
   }
 
   @Override
@@ -209,7 +206,7 @@ public class Drive extends SubsystemBase {
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
 
-    odometry.update(rawGyroRotation, getModulePositions());
+    
 
     // Update odometry
     double[] sampleTimestamps =
@@ -253,7 +250,8 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput(observation.camName()+"/stdDevTheta", observation.stdDevs().get(2));
         // Logger.recordOutput(observation.camName()+"/TransformFromOdometry", odometry.getPoseMeters().minus(observation.pose()));
     }
-
+    //poseEstimator.update(rawGyroRotation, getModulePositions());
+    odometry.update(rawGyroRotation, getModulePositions());
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
   }

@@ -34,7 +34,7 @@ public class TeleopCommands {
   public Command getIntakeCoralCmd() {
     return new SequentialCommandGroup(
         new ParallelCommandGroup(
-            mIntake.setIntakePivotCmd(Pivot.Setpoints.StowIntake.getPos()),
+            mIntake.setIntakePivotCmd(Pivot.Setpoints.IntakeCoral.getPos()),
             mIntake.intakeCoralCmd()),
         mIntake.setIntakePivotCmd(Pivot.Setpoints.StowIntake.getPos()));
   }

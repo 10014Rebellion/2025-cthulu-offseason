@@ -85,6 +85,8 @@ public class ButtonBindings {
 
     mDriverController.povDown().whileTrue(mArm.setVoltageCommand(-3));
 
+    mDriverController.b().whileTrue(mIntake.intakeTunablePivotToGoal());
+
     // mDriverController.y().whileTrue(mArm.setPIDCmd(45));
 
     // mDriverController.x().whileTrue(mArm.setPIDCmd(0));
@@ -93,6 +95,8 @@ public class ButtonBindings {
 
     mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
     mDriverController.rightTrigger().whileTrue(mFlywheels.setIndexerVoltageCommand(-12));
+
+    mDriverController.leftBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd());
 
     mDriverController.y().whileTrue(
         mFlywheels.setTuneableRPM());

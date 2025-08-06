@@ -14,7 +14,7 @@ public class IntakeConstants {
     static {
       kRangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 3000;
       kRangeConfig.ProximityParams.ProximityHysteresis = 0.01;
-      kRangeConfig.ProximityParams.ProximityThreshold = 0.03;
+      kRangeConfig.ProximityParams.ProximityThreshold = 0.06;
     }
   }
 
@@ -28,19 +28,20 @@ public class IntakeConstants {
 
     public static final double kEncoderConversionFactor = 360;
     public static final boolean kEncoderInverted = true;
-    public static final double kMotorEncoderOffsetRev = 0.1413399;
-    public static final double kLowerLimitDeg = -25;
-    public static final double kUpperLimitDeg = 70;
+    public static final double kMotorEncoderOffsetRev = 0.3336152;
+    public static final double kLowerLimitDeg = -19;
+    public static final double kUpperLimitDeg = 50;
+    public static final double kCGAngleOffset = 30;
     public static final double kTolerance = 5.0;
 
     public static final double kP = 0.1;
     public static final double kD = 0.0;
-    public static final double kMaxVelocity = 0.0;
-    public static final double kMaxAcceleration = 0.0;
+    public static final double kMaxVelocity = 500.0;
+    public static final double kMaxAcceleration = 500.0;
 
-    public static final double kS = 0.0;
-    public static final double kG = 0.4;
-    public static final double kV = 0.0;
+    public static final double kS = 0.05;
+    public static final double kG = 0.8;
+    public static final double kV = 0.2;
     public static final double kA = 0.0;
 
     public static final SparkMaxConfig kMotorConfig = new SparkMaxConfig();
@@ -49,11 +50,11 @@ public class IntakeConstants {
 
     public enum Setpoints {
       IntakeAlgae(26),
-      IntakeCoral(-25),
+      IntakeCoral(-18),
       Processor(30),
       AvoidArm(45),
-      ScoreL1(60),
-      StowIntake(60);
+      ScoreL1(50),
+      StowIntake(45);
 
       public final double setpoint;
 
