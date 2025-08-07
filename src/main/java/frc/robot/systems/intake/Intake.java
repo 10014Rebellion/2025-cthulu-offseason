@@ -28,18 +28,21 @@ public class Intake extends SubsystemBase {
   private final ArmFeedforward mPivotFeedforward;
 
   private double goal = 0;
+  private double CGoffset = Pivot.kCGAngleOffset;
 
-  private LoggedTunableNumber nTuneableP = new LoggedTunableNumber("Intake/Tuneables/kP", Pivot.kP);
-  private LoggedTunableNumber nTuneableD = new LoggedTunableNumber("Intake/Tuneables/kD", Pivot.kD);
+  private LoggedTunableNumber nTuneableP = new LoggedTunableNumber("Intake/Tuneables/kP", Pivot.kP0);
+  private LoggedTunableNumber nTuneableD = new LoggedTunableNumber("Intake/Tuneables/kD", Pivot.kD0);
   private LoggedTunableNumber nTuneableVelocity =
-      new LoggedTunableNumber("Intake/Tuneables/kVelocity", Pivot.kMaxVelocity);
+      new LoggedTunableNumber("Intake/Tuneables/kVelocity", Pivot.kMV0);
   private LoggedTunableNumber nTuneableAccel =
-      new LoggedTunableNumber("Intake/Tuneables/kAccel", Pivot.kMaxAcceleration);
-  private LoggedTunableNumber nTuneableS = new LoggedTunableNumber("Intake/Tuneables/kS", Pivot.kS);
-  private LoggedTunableNumber nTuneableV = new LoggedTunableNumber("Intake/Tuneables/kV", Pivot.kV);
-  private LoggedTunableNumber nTuneableG = new LoggedTunableNumber("Intake/Tuneables/kG", Pivot.kG);
+      new LoggedTunableNumber("Intake/Tuneables/kAccel", Pivot.kMA0);
+  private LoggedTunableNumber nTuneableS = new LoggedTunableNumber("Intake/Tuneables/kS", Pivot.kS0);
+  private LoggedTunableNumber nTuneableV = new LoggedTunableNumber("Intake/Tuneables/kV", Pivot.kV0);
+  private LoggedTunableNumber nTuneableG = new LoggedTunableNumber("Intake/Tuneables/kG", Pivot.kG0);
   private LoggedTunableNumber nTuneableSetpoint =
       new LoggedTunableNumber("Intake/Tuneables/Setpoint", 0.0);
+
+  private int slot = 0;
 
   public Intake() {
     this.mCANRange = new CANrange(CANRange.kCANRangeID, Constants.kCTRECanBusName);
@@ -50,9 +53,9 @@ public class Intake extends SubsystemBase {
 
     this.mPivotController =
         new ProfiledPIDController(
-            Pivot.kP, 0, Pivot.kD, new Constraints(Pivot.kMaxVelocity, Pivot.kMaxAcceleration));
+            Pivot.kP0, 0, Pivot.kD0, new Constraints(Pivot.kMV0, Pivot.kMA0));
     this.mPivotController.setTolerance(Pivot.kTolerance);
-    this.mPivotFeedforward = new ArmFeedforward(Pivot.kS, Pivot.kG, Pivot.kV, Pivot.kA);
+    this.mPivotFeedforward = new ArmFeedforward(Pivot.kS0, Pivot.kG0, Pivot.kV0, Pivot.kA0);
 
     this.mRollerMotor.configure(
         Roller.kMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -117,16 +120,15 @@ public class Intake extends SubsystemBase {
   public FunctionalCommand intakePivotFF() {
     return new FunctionalCommand(
         () -> {
-          mPivotController.reset(getPivotAngleDeg());
         },
         () -> {
-          mPivotController.setGoal(getPivotAngleDeg());
-          setPivotVolts(
-              mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg() + Pivot.kCGAngleOffset), 0.0));
+          double FFoutput = mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg() + CGoffset), 0.0);
+          setPivotVolts(FFoutput);
+              Logger.recordOutput("Intake/Pivot/FF Output", FFoutput);
         },
         (interrupted) ->
             setPivotVolts(
-                mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg() + Pivot.kCGAngleOffset), 0.0)),
+                mPivotFeedforward.calculate(Units.degreesToRadians(getPivotAngleDeg() + CGoffset), 0.0)),
         () -> false,
         this);
   }
@@ -141,12 +143,12 @@ public class Intake extends SubsystemBase {
             setPivotVolts(
                 mPivotController.calculate(getPivotAngleDeg())
                     + mPivotFeedforward.calculate(
-                        Units.degreesToRadians(mPivotController.getSetpoint().position + Pivot.kCGAngleOffset),
+                        Units.degreesToRadians(mPivotController.getSetpoint().position + CGoffset),
                         Units.degreesToRadians(mPivotController.getSetpoint().velocity))),
         (interrupted) ->
             setPivotVolts(
                 mPivotFeedforward.calculate(
-                    Units.degreesToRadians(getPivotAngleDeg() + Pivot.kCGAngleOffset),
+                    Units.degreesToRadians(getPivotAngleDeg() + CGoffset),
                     0.0)),
         () -> mPivotController.atGoal(),
         this);
@@ -162,12 +164,16 @@ public class Intake extends SubsystemBase {
           double PIDoutput = mPivotController.calculate(getPivotAngleDeg());
           double FFoutput =
               mPivotFeedforward.calculate(
-                  Units.degreesToRadians(mPivotController.getSetpoint().position + Pivot.kCGAngleOffset),
+                  Units.degreesToRadians(mPivotController.getSetpoint().position + CGoffset),
                   Units.degreesToRadians(mPivotController.getSetpoint().velocity));
           setPivotVolts(PIDoutput + FFoutput);
           Logger.recordOutput("Intake/Pivot/Full Output", PIDoutput + FFoutput);
           Logger.recordOutput("Intake/Pivot/PID Output", PIDoutput);
           Logger.recordOutput("Intake/Pivot/FF Output", FFoutput);
+          Logger.recordOutput("Intake/Pivot/Intake Position Setpoint Deg", mPivotController.getSetpoint().position);
+          Logger.recordOutput("Intake/Pivot/Intake Position Setpoint Radian", Units.degreesToRadians(mPivotController.getSetpoint().position));
+          Logger.recordOutput("Intake/Pivot/Intake Velocity Setpoint Deg", mPivotController.getSetpoint().velocity);
+          Logger.recordOutput("Intake/Pivot/Intake Velocity Setpoint Radian", Units.degreesToRadians(mPivotController.getSetpoint().velocity));
         },
         (interrupted) -> setPivotVolts(0.0),
         () -> false,
@@ -211,6 +217,25 @@ public class Intake extends SubsystemBase {
     mPivotFeedforward.setKs(kS);
   }
 
+  private void setPIDandFF(double kP, double kD, double kMaxVelocity, double kMaxAccel, double kS, double kV, double kG) {
+    mPivotController.setP(kP);
+    mPivotController.setD(kD);
+    mPivotController.setConstraints(
+      new Constraints(kMaxVelocity, kMaxAccel)
+    );
+    mPivotFeedforward.setKg(kG);
+    mPivotFeedforward.setKv(kV);
+    mPivotFeedforward.setKs(kS);
+  }
+
+  private void setSlot(int slot) {
+    if (slot > 1) {
+      System.out.println("NOTE! THIS DOES NOT CURRENTLY EXIST!");
+    }
+    else this.slot = slot;
+  }
+
+
   @Override
   public void periodic() {
     Logger.recordOutput("Intake/Pivot/Voltage", getPivotVoltage());
@@ -224,29 +249,39 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Intake/Rollers/CAN Range/Detects Object", mCANRange.getIsDetected().getValue());
     LoggedTunableNumber.ifChanged(
         hashCode(),
-        () -> {
-          setPID(nTuneableP.get(), nTuneableD.get());
-        },
-        nTuneableP,
-        nTuneableD);
+        () -> {setPID(nTuneableP.get(), nTuneableD.get());
+        }, nTuneableP, nTuneableD);
 
     LoggedTunableNumber.ifChanged(
         hashCode(),
-        () -> {
-          setFF(nTuneableS.get(), nTuneableV.get(), nTuneableG.get());
+        () -> {setFF(nTuneableS.get(), nTuneableV.get(), nTuneableG.get());
         },
-        nTuneableS,
-        nTuneableV,
-        nTuneableG);
+        nTuneableS, nTuneableV, nTuneableG);
 
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {
           setConstraints(nTuneableVelocity.get(), nTuneableAccel.get());
-        },
-        nTuneableVelocity,
-        nTuneableAccel);
+        }, nTuneableVelocity, nTuneableAccel);
 
     if (isAtLimit(getPivotVoltage())) stopPivotMotor();
+
+    // if(hasCoral()) {
+    //   setSlot(1);
+    // }
+    // else {setSlot(0);}
+
+    // switch(slot) {
+    //   case 0:
+    //     setPIDandFF(Pivot.kP0, Pivot.kD0, Pivot.kMV0, Pivot.kMA0, Pivot.kS0, Pivot.kV0, Pivot.kG0);
+    //     CGoffset = Pivot.kCGAngleOffset;
+    //     break;
+    //   case 1:
+    //     setPIDandFF(Pivot.kP1, Pivot.kD1, Pivot.kMV1, Pivot.kMA1, Pivot.kS1, Pivot.kV1, Pivot.kG1);
+    //     CGoffset = Pivot.kCGCoralAngleOffset;
+    //     break;
+    //   default:
+    //     Logger.recordOutput("STOP DUMBAHH", "ELEVATOR");
+    // }
   }
 }

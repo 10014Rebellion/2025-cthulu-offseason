@@ -83,7 +83,11 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim(),
-                new ModuleIOSim());
+                new ModuleIOSim(),
+                new Vision(new CameraIO[] {
+                  new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform,  VisionConstants.kLeftCamOrientation),
+                  new CameraIOPV(VisionConstants.kRightCamName, VisionConstants.kRightCamTransform, VisionConstants.kRightCamOrientation)
+                }));
 
         break;
 
@@ -95,7 +99,11 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                new Vision(new CameraIO[] {
+                  new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform,  VisionConstants.kLeftCamOrientation),
+                  new CameraIOPV(VisionConstants.kRightCamName, VisionConstants.kRightCamTransform, VisionConstants.kRightCamOrientation)
+                }));
 
         break;
     }
@@ -138,7 +146,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     mButtonBindings.initDriverJoysticks();
-    // mButtonBindings.initDriverButtons();
+    mButtonBindings.initDriverButtons();
 
     mButtonBindings.initOperatorBindings();
 

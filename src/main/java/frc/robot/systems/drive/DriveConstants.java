@@ -48,7 +48,7 @@ public class DriveConstants {
   public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0));
   public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRadians((Math.PI));
   public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0);
-  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0));
+  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRadians((3 * Math.PI / 2.0));
 
   // Device CAN IDs
   public static final int pigeonCanId = 10;

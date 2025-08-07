@@ -33,6 +33,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.utils.LoggedTunableNumber;
+
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -62,7 +64,19 @@ public class ModuleIOSpark implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
+  private int moduleID;
+
+  private LoggedTunableNumber nDriveP;
+  private LoggedTunableNumber nDriveD;
+
+  private LoggedTunableNumber nTurnP;
+  private LoggedTunableNumber nTurnD;
+
+  private SparkMaxConfig mDriveConfig;
+  private SparkMaxConfig mTurnConfig;
+
   public ModuleIOSpark(int module) {
+    moduleID = module;
     zeroRotation =
         switch (module) {
           case 0 -> frontLeftZeroRotation;
@@ -123,6 +137,7 @@ public class ModuleIOSpark implements ModuleIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
+    mDriveConfig = driveConfig;
     tryUntilOk(
         driveSpark,
         5,
@@ -159,6 +174,7 @@ public class ModuleIOSpark implements ModuleIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
+    mTurnConfig = turnConfig;
     tryUntilOk(
         turnSpark,
         5,
@@ -172,6 +188,11 @@ public class ModuleIOSpark implements ModuleIO {
         SparkOdometryThread.getInstance().registerSignal(driveSpark, driveEncoder::getPosition);
     turnPositionQueue =
         SparkOdometryThread.getInstance().registerSignal(turnSpark, turnEncoder::getPosition);
+    
+    nDriveP = new LoggedTunableNumber("Drive/Module " + module + "/Drive P", driveKp);
+    nDriveD = new LoggedTunableNumber("Drive/Module " + module + "/Drive D", driveKd);
+    nTurnP = new LoggedTunableNumber("Drive/Module " + module + "/Turn P", turnKp);
+    nTurnD = new LoggedTunableNumber("Drive/Module " + module + "/Turn D", turnKd);
   }
 
   @Override
@@ -213,6 +234,21 @@ public class ModuleIOSpark implements ModuleIO {
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
+
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> {updatePID(nDriveP.get(), nDriveD.get(), nTurnP.get(), nTurnD.get());
+        }, nDriveP, nDriveD, nTurnP, nTurnD);
+  }
+
+  public void updatePID(double kDriveP, double kDriveD, double kTurnP, double kTurnD) {
+    SparkMaxConfig driveConfig = this.mDriveConfig;
+    SparkMaxConfig turnConfig = this.mTurnConfig;
+
+    driveConfig.closedLoop.pidf(kDriveP, 0.0, kDriveD, 0.0);
+    turnConfig.closedLoop.pidf(kTurnP, 0.0, kTurnD, 0.0);
+    driveSpark.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    turnSpark.configure(turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override

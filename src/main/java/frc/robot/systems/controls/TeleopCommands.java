@@ -39,6 +39,13 @@ public class TeleopCommands {
         mIntake.setIntakePivotCmd(Pivot.Setpoints.StowIntake.getPos()));
   }
 
+  public Command getScoreL1Cmd() {
+    return
+        new ParallelCommandGroup(
+            mIntake.setIntakePivotCmd(Pivot.Setpoints.ScoreL1.getPos()),
+            mIntake.setRollerVoltageCommand(Roller.Voltage.ScoreL1.getVoltage()));
+  }
+
   public Command getIntakeFloorAlgaeCmd() {
     return new SequentialCommandGroup(
         mIntake.setIntakePivotCmd(Pivot.Setpoints.IntakeAlgae.getPos()),
@@ -54,7 +61,7 @@ public class TeleopCommands {
   }
 
   // this one is gonna be a doozy to set up. for now i will just put the basic version.
-  public Command basicFireAlgaeCmd() {
+  public Command getBasicFireAlgaeCmd() {
     return new ParallelCommandGroup(
         mFlywheels.setTopFlywheelVoltageCommand(
             FlywheelConstants.topFlywheel.Voltage.BasicShootAlgae.getVoltage()),
@@ -68,7 +75,7 @@ public class TeleopCommands {
                 FlywheelConstants.indexer.Voltage.FireAlgae.getVoltage())));
   }
 
-  public Command scoreProcessorCmd() {
+  public Command getScoreProcessorCmd() {
     return new SequentialCommandGroup(
         mIntake.setIntakePivotCmd(Pivot.Setpoints.Processor.getPos()),
         mArm.setPIDCmd(ArmConstants.Setpoints.Processor.getPos()),
@@ -78,5 +85,27 @@ public class TeleopCommands {
                 bottomFlywheel.Voltage.scoreProcessor.getVoltage(),
                 indexer.Voltage.scoreProcessor.getVoltage()),
             mIntake.setRollerVoltageCommand(Roller.Voltage.ScoreProcessor.getVoltage())));
+  }
+
+  public Command getIntakeL2AlgaeCmd() {
+    return new SequentialCommandGroup(
+        new ParallelDeadlineGroup(
+            mFlywheels.intakeAlgaeCommand(),
+            mArm.setPIDCmd(ArmConstants.Setpoints.L2Algae.getPos()),
+            mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos())
+        ),
+        mArm.setPIDCmd(ArmConstants.Setpoints.Hold.getPos())
+    );
+  }
+
+  public Command getIntakeL3AlgaeCmd() {
+    return new SequentialCommandGroup(
+        new ParallelDeadlineGroup(
+            mFlywheels.intakeAlgaeCommand(),
+            mArm.setPIDCmd(ArmConstants.Setpoints.L3Algae.getPos()),
+            mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos())
+        ),
+        mArm.setPIDCmd(ArmConstants.Setpoints.Hold.getPos())
+    );
   }
 }

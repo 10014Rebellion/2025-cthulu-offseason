@@ -44,7 +44,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.Constants.Mode;
+import frc.robot.systems.drive.GyroIOInputsAutoLogged;
+import frc.robot.systems.vision.CameraIO;
 import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.Vision.VisionObservation;
 import frc.robot.utils.LocalADStarAK;
@@ -254,6 +257,8 @@ public class Drive extends SubsystemBase {
     odometry.update(rawGyroRotation, getModulePositions());
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+
+    getShotDistanceToBarge();
   }
 
   /**
@@ -393,5 +398,39 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return maxSpeedMetersPerSec / driveBaseRadius;
+  }
+
+  public void getShotDistanceToBarge() {
+    // AFAIK this should basically just be getting the hypotenuse using dist (y-axis) from barge and the angle of the yaw?
+    // Also we need to check that it would be within the x-axis of the barge
+    Pose2d robotPose = poseEstimator.getEstimatedPosition();
+    boolean withinAcceptableRange = false;
+    // gets distance to the barge on ONLY the Y-axis
+    double robotXDistanceToBarge = Math.abs(robotPose.getX() - FieldConstants.kBargeXPosition);
+    double aimedDistanceToBarge = 0;
+    if (getRotation().getSin() == 0) {
+      aimedDistanceToBarge = robotXDistanceToBarge;
+    }
+    else {aimedDistanceToBarge = robotXDistanceToBarge / getRotation().getCos();}
+    double aimedYPosition = aimedDistanceToBarge * getRotation().getSin() + robotPose.getY();
+    Pose2d aimedPose = new Pose2d(FieldConstants.kBargeXPosition, aimedYPosition, new Rotation2d());
+  
+    if (Constants.currentMode == Mode.REAL) {
+      if (DriverStation.getAlliance().get() == Alliance.Red) {
+        if ((0 + FieldConstants.algaeDiameter) <= aimedYPosition && aimedYPosition <= (FieldConstants.kRedBargeEdge - FieldConstants.algaeDiameter)) {
+          withinAcceptableRange = true;
+        }
+      }
+      else {
+        if ((FieldConstants.kBlueBargeEdge + FieldConstants.algaeDiameter) <= aimedYPosition && aimedYPosition <= (Constants.kFieldWidthMeters - FieldConstants.algaeDiameter)) {
+          withinAcceptableRange = true;
+        }
+      }
+    }
+    Logger.recordOutput("Drive/Aimed Pose", aimedPose);
+    Logger.recordOutput("Drive/Aimed Distance", aimedDistanceToBarge);
+    Logger.recordOutput("Drive/X Dist to Barge", robotXDistanceToBarge);
+    Logger.recordOutput("Drive/Acceptable Aim Direction + Distance", withinAcceptableRange);
+    //return 0.0;
   }
 }

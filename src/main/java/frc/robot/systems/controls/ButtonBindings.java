@@ -9,7 +9,12 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.systems.arm.Arm;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
+import frc.robot.systems.intake.IntakeConstants;
+import frc.robot.systems.intake.IntakeConstants.Roller;
 import frc.robot.systems.shooter.Flywheels;
+import frc.robot.systems.shooter.FlywheelConstants.bottomFlywheel;
+import frc.robot.systems.shooter.FlywheelConstants.indexer;
+import frc.robot.systems.shooter.FlywheelConstants.topFlywheel;
 
 public class ButtonBindings {
   private final CommandXboxController mDriverController;
@@ -74,7 +79,7 @@ public class ButtonBindings {
   }
   // All bindings for the operator should be here.
   public void initOperatorBindings() {
-    mOperatorController.a().whileTrue(mTeleopCommands.scoreProcessorCmd());
+    mOperatorController.a().whileTrue(mTeleopCommands.getScoreProcessorCmd());
   }
 
   // All bindings for running certain commands that aren't ready for "competition" use yet go here.
@@ -93,20 +98,28 @@ public class ButtonBindings {
 
     // mDriverController.a().whileTrue(mArm.setPIDCmd(-30));
 
-    mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
-    mDriverController.rightTrigger().whileTrue(mFlywheels.setIndexerVoltageCommand(-12));
+    mDriverController.leftTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
+    // mDriverController.leftTrigger().whileTrue(mTeleopCommands.get;
 
-    mDriverController.leftBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd());
+    mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
+    .onFalse(mIntake.setIntakePivotCmd(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()));
+    mDriverController.leftBumper().whileTrue(mTeleopCommands.getScoreL1Cmd());
 
-    mDriverController.y().whileTrue(
-        mFlywheels.setTuneableRPM());
-    mDriverController.a().whileTrue(
-      new ParallelCommandGroup(
-        mFlywheels.setTopFlywheelRPM(3000),
-        mFlywheels.setBottomFlywheelRPM(3000)
-    ));
+    mDriverController.y().whileTrue(mArm.setTuneablePIDCmd());
+    mDriverController.rightTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
+    mDriverController.leftTrigger().whileTrue(mTeleopCommands.getScoreProcessorCmd());
+    // mDriverController.y().whileTrue(
+    //     mFlywheels.setTuneableRPM());
+    // mDriverController.a().whileTrue(
+    //   new ParallelCommandGroup(
+    //     mFlywheels.setTopFlywheelRPM(3000),
+    //     mFlywheels.setBottomFlywheelRPM(3000)
+    // ));
     //mDriverController.b().whileTrue(mFlywheels.setBottomFlywheelRPM(6000));
-    mDriverController.x().whileTrue(mArm.setTuneablePIDCmd());
+    // mDriverController.x().whileTrue(mIntake.intakePivotFF());
+    // mDriverController.y().whileTrue(mIntake.intakeTunablePivotToGoal());
+    // mDriverController.rightBumper().whileTrue(mIntake.intakeCoralCmd());
+    // mDriverController.leftBumper().whileTrue(mIntake.setRollerVoltageCommand(Roller.Voltage.ScoreL1.getVoltage()));
     //mDriverController.a().whileTrue(mFlywheels.setBottomFlywheelRPM(3000));
   }
 }
