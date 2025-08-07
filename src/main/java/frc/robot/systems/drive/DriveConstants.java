@@ -26,6 +26,9 @@ public class DriveConstants {
   public static final double trackWidthM = 0.65;
   public static final double wheelBaseM = 0.65;
   public static final double driveBaseRadius = Math.hypot(trackWidthM / 2.0, wheelBaseM / 2.0);
+  public static final double facingBargeThreshold = 60;
+  public static final double bargeRangeMinimum = 1.0;
+  public static final double bargeRangeMaximum = 4.5;
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
         new Translation2d(trackWidthM / 2.0, wheelBaseM / 2.0),

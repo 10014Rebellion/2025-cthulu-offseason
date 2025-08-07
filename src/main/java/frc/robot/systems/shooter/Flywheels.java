@@ -230,8 +230,8 @@ public class Flywheels extends SubsystemBase {
   public FunctionalCommand setBothFlywheelsRPM(double pDesiredRPM) {
     return new FunctionalCommand(
         () -> {
-          mBottomFlywheel.setTargetVelocity(MathUtil.clamp(pDesiredRPM * FlywheelConstants.bottomMultipler, -bottomFlywheel.kMaxRPM, bottomFlywheel.kMaxRPM));
-          mTopFlywheel.setTargetVelocity(MathUtil.clamp(pDesiredRPM, -topFlywheel.kMaxRPM, topFlywheel.kMaxRPM));
+          mBottomFlywheel.setTargetVelocity(MathUtil.clamp(pDesiredRPM, -bottomFlywheel.kMaxRPM, bottomFlywheel.kMaxRPM));
+          mTopFlywheel.setTargetVelocity(MathUtil.clamp(pDesiredRPM * FlywheelConstants.bottomMultipler, -topFlywheel.kMaxRPM, topFlywheel.kMaxRPM));
 
           if (pDesiredRPM > bottomFlywheel.kMaxRPM * FlywheelConstants.bottomMultipler) {
             DriverStation.reportWarning(
@@ -256,6 +256,40 @@ public class Flywheels extends SubsystemBase {
         () -> {},
         (interrupted) -> {},
         () -> false);
+  }
+
+  public void setBothRPM(double pTopRPM, double pBottomRPM) {
+    mTopFlywheel.setTargetVelocity(MathUtil.clamp(pTopRPM, -topFlywheel.kMaxRPM, topFlywheel.kMaxRPM));
+    checkTopRPMLimits(pTopRPM);
+
+    mBottomFlywheel.setTargetVelocity(MathUtil.clamp(pBottomRPM, -bottomFlywheel.kMaxRPM, bottomFlywheel.kMaxRPM));
+
+    checkBottomRPMLimits(pBottomRPM);
+    
+  }
+
+  private void checkTopRPMLimits(double pTopRPM) {
+    if (pTopRPM > topFlywheel.kMaxRPM) {
+      DriverStation.reportWarning(
+          "SETPOINT RPM "
+              + pTopRPM
+              + "EXCEEDS THE MAXIMUM RPM OF "
+              + topFlywheel.kMaxRPM,
+          true);
+    }
+    mTrackedTopVelocity = pTopRPM;
+  }
+
+  private void checkBottomRPMLimits(double pBottomRPM) {
+    if (pBottomRPM > bottomFlywheel.kMaxRPM) {
+      DriverStation.reportWarning(
+          "SETPOINT RPM "
+              + pBottomRPM
+              + "EXCEEDS THE MAXIMUM RPM OF "
+              + bottomFlywheel.kMaxRPM * FlywheelConstants.bottomMultipler,
+          true);
+    }
+    mTrackedBottomVelocity = pBottomRPM;
   }
 
   public FunctionalCommand setBottomFlywheelRPM(double pDesiredRPM) {

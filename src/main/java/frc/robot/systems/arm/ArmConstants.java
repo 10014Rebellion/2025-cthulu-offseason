@@ -12,7 +12,7 @@ public class ArmConstants {
   public static boolean kMotorInverted = false;
   public static int kCurrentLimit = 60;
 
-  public static double kP = 0.45; // 0.8
+  public static double kP = 0.3; // 0.8
   public static double kI = 0.0;
   public static double kD = 0.0;
 

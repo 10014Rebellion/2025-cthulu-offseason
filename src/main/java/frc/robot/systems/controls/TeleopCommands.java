@@ -17,18 +17,21 @@ import frc.robot.systems.shooter.FlywheelConstants.bottomFlywheel;
 import frc.robot.systems.shooter.FlywheelConstants.indexer;
 import frc.robot.systems.shooter.FlywheelConstants.topFlywheel;
 import frc.robot.systems.shooter.Flywheels;
+import frc.robot.systems.shooter.ShotmapManager;
 
 public class TeleopCommands {
   private final Drive mDrive;
   private final Arm mArm;
   private final Intake mIntake;
   private final Flywheels mFlywheels;
+  private final ShotmapManager mShotmapManager;
 
-  public TeleopCommands(Drive pDrive, Arm pArm, Intake pIntake, Flywheels pFlywheels) {
+  public TeleopCommands(Drive pDrive, Arm pArm, Intake pIntake, Flywheels pFlywheels, ShotmapManager pShotmapManager) {
     this.mDrive = pDrive;
     this.mArm = pArm;
     this.mIntake = pIntake;
     this.mFlywheels = pFlywheels;
+    this.mShotmapManager = pShotmapManager;
   }
 
   public Command getIntakeCoralCmd() {
@@ -110,6 +113,13 @@ public class TeleopCommands {
             mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos())
         ),
         mArm.setPIDCmd(ArmConstants.Setpoints.Hold.getPos())
+    );
+  }
+
+  public Command getPrepShooterCmd() {
+    return new ParallelCommandGroup(
+        mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos()),
+        mShotmapManager.alignShooterCommand()
     );
   }
 }

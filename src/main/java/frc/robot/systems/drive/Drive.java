@@ -80,6 +80,8 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  private boolean canHitBarge = false;
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -258,7 +260,7 @@ public class Drive extends SubsystemBase {
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
 
-    getShotDistanceToBarge();
+    getShotDistance();
   }
 
   /**
@@ -400,37 +402,72 @@ public class Drive extends SubsystemBase {
     return maxSpeedMetersPerSec / driveBaseRadius;
   }
 
-  public void getShotDistanceToBarge() {
+  public double getShotDistance() {
     // AFAIK this should basically just be getting the hypotenuse using dist (y-axis) from barge and the angle of the yaw?
     // Also we need to check that it would be within the x-axis of the barge
     Pose2d robotPose = poseEstimator.getEstimatedPosition();
-    boolean withinAcceptableRange = false;
-    // gets distance to the barge on ONLY the Y-axis
+    Rotation2d robotRotation = robotPose.getRotation();
     double robotXDistanceToBarge = Math.abs(robotPose.getX() - FieldConstants.kBargeXPosition);
     double aimedDistanceToBarge = 0;
-    if (getRotation().getSin() == 0) {
-      aimedDistanceToBarge = robotXDistanceToBarge;
+    double aimedYPosition = 0;
+
+    if (robotRotation.getCos() == 0) {
+      aimedDistanceToBarge = Math.abs(robotXDistanceToBarge);
     }
-    else {aimedDistanceToBarge = robotXDistanceToBarge / getRotation().getCos();}
-    double aimedYPosition = aimedDistanceToBarge * getRotation().getSin() + robotPose.getY();
-    Pose2d aimedPose = new Pose2d(FieldConstants.kBargeXPosition, aimedYPosition, new Rotation2d());
-  
-    if (Constants.currentMode == Mode.REAL) {
-      if (DriverStation.getAlliance().get() == Alliance.Red) {
-        if ((0 + FieldConstants.algaeDiameter) <= aimedYPosition && aimedYPosition <= (FieldConstants.kRedBargeEdge - FieldConstants.algaeDiameter)) {
-          withinAcceptableRange = true;
-        }
+    else aimedDistanceToBarge = Math.abs(robotXDistanceToBarge * 1/robotRotation.getCos());
+    
+    
+
+    if (-90 < robotRotation.getDegrees() && robotRotation.getDegrees() < 90) {
+      aimedYPosition = aimedDistanceToBarge * robotRotation.getSin() + robotPose.getY();
+    }
+    else {
+      aimedYPosition = -aimedDistanceToBarge * robotRotation.getSin() + robotPose.getY();
+    }
+
+    Pose2d bargeScoringPose = new Pose2d(FieldConstants.kBargeXPosition, aimedYPosition, robotPose.getRotation());
+
+    Alliance allianceColor = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    
+
+    boolean isWithinBarge = false;
+    if (allianceColor == DriverStation.Alliance.Blue) {
+      if (FieldConstants.kBlueBargeEdge < aimedYPosition && aimedYPosition < FieldConstants.kBlueBargeEdge + FieldConstants.kBargeLength){
+        isWithinBarge = true;
       }
-      else {
-        if ((FieldConstants.kBlueBargeEdge + FieldConstants.algaeDiameter) <= aimedYPosition && aimedYPosition <= (Constants.kFieldWidthMeters - FieldConstants.algaeDiameter)) {
-          withinAcceptableRange = true;
-        }
+    } 
+    else {
+      if (0.0 < aimedYPosition && aimedYPosition < FieldConstants.kRedBargeEdge) {
+        isWithinBarge = true;
       }
     }
-    Logger.recordOutput("Drive/Aimed Pose", aimedPose);
-    Logger.recordOutput("Drive/Aimed Distance", aimedDistanceToBarge);
+
+    boolean isWithinRange = (DriveConstants.bargeRangeMinimum < aimedDistanceToBarge && aimedDistanceToBarge < DriveConstants.bargeRangeMaximum);
+
+    this.canHitBarge = isFacingBarge() && isWithinBarge && isWithinRange;
+
     Logger.recordOutput("Drive/X Dist to Barge", robotXDistanceToBarge);
-    Logger.recordOutput("Drive/Acceptable Aim Direction + Distance", withinAcceptableRange);
-    //return 0.0;
+    Logger.recordOutput("Drive/Aimed Pose", bargeScoringPose);
+    Logger.recordOutput("Drive/Aimed Distance", aimedDistanceToBarge);
+    Logger.recordOutput("Drive/Facing Barge", isFacingBarge());
+    Logger.recordOutput("Drive/Within Barge", isWithinBarge);
+    Logger.recordOutput("Drive/Can Hit Barge", canHitBarge);
+    // Logger.recordOutput("Drive/Is Facing Barge", isFacingBarge());
+    // Logger.recordOutput("Drive/Acceptable Aim Direction + Distance", withinAcceptableRange);
+    return aimedDistanceToBarge;
   }
+
+  private boolean isFacingBarge() {
+
+    return ((-DriveConstants.facingBargeThreshold < getRotation().getDegrees() && getRotation().getDegrees() < DriveConstants.facingBargeThreshold 
+    && getPose().getX() < FieldConstants.kBargeXPosition - DriveConstants.bargeRangeMinimum)
+    || ((180 - DriveConstants.facingBargeThreshold < getRotation().getDegrees() || getRotation().getDegrees() < -180 + DriveConstants.facingBargeThreshold)
+    && getPose().getX() > FieldConstants.kBargeXPosition + DriveConstants.bargeRangeMinimum));
+    
+  }
+
+  public boolean canHitBarge() {
+    return canHitBarge;
+  }
+
 }

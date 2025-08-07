@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.systems.LEDs.LEDSubsystem;
 import frc.robot.systems.arm.Arm;
 import frc.robot.systems.controls.ButtonBindings;
 import frc.robot.systems.drive.Drive;
@@ -29,6 +30,7 @@ import frc.robot.systems.drive.ModuleIOSim;
 import frc.robot.systems.drive.ModuleIOSpark;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.Flywheels;
+import frc.robot.systems.shooter.ShotmapManager;
 import frc.robot.systems.vision.CameraIO;
 import frc.robot.systems.vision.CameraIOPV;
 import frc.robot.systems.vision.Vision;
@@ -49,6 +51,8 @@ public class RobotContainer {
   private final Arm arm;
   private final Intake intake;
   private final Flywheels flywheels;
+  private final ShotmapManager shotmapManager;
+  private final LEDSubsystem LEDs;
 
   // Controller
   private final ButtonBindings mButtonBindings;
@@ -113,6 +117,8 @@ public class RobotContainer {
     intake = new Intake();
     intake.setDefaultCommand(intake.intakePivotFF());
     flywheels = new Flywheels();
+    shotmapManager = new ShotmapManager(arm, flywheels, drive);
+    LEDs = new LEDSubsystem();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -133,7 +139,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    mButtonBindings = new ButtonBindings(drive, arm, intake, flywheels);
+    mButtonBindings = new ButtonBindings(drive, arm, intake, flywheels, shotmapManager, LEDs);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -148,9 +154,9 @@ public class RobotContainer {
     mButtonBindings.initDriverJoysticks();
     mButtonBindings.initDriverButtons();
 
-    mButtonBindings.initOperatorBindings();
+    // mButtonBindings.initOperatorBindings();
 
-    // mButtonBindings.initTestBindings();
+    mButtonBindings.initTestBindings();
   }
 
   // private void configureTestBindings() {
