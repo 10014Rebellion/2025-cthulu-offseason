@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NS-F6"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ReadyCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "F6-A6"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A6-F6F"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ReadyAlgaeL3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "F6F-A6F"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A6F-ShootBB"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootAlgae"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
