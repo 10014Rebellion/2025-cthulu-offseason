@@ -43,7 +43,7 @@ public class ArmConstants {
     Hold(0),
     Processor(-40),
     Intake(-40),
-    L2Algae(90),
+    L2Algae(60),
     L3Algae(90);
 
     public final double setpoint;

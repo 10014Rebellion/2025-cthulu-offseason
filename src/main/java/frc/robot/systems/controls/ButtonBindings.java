@@ -79,6 +79,10 @@ public class ButtonBindings {
   }
   // All bindings for the operator should be here.
   public void initOperatorBindings() {
+    mOperatorController.rightBumper().whileTrue(mTeleopCommands.getPrepL1Cmd());
+
+    mOperatorController.y().whileTrue(mTeleopCommands.getIntakeL2AlgaeCmd());
+    mOperatorController.x().whileTrue(mTeleopCommands.getIntakeL3AlgaeCmd());
     mOperatorController.a().whileTrue(mTeleopCommands.getScoreProcessorCmd());
   }
 
@@ -86,9 +90,9 @@ public class ButtonBindings {
   public void initTestBindings() {
     // mDriverController.b().whileTrue(mTeleopCommands.scoreProcessorCmd());
 
-    mDriverController.povUp().whileTrue(mArm.setVoltageCommand(3));
+    // mDriverController.povUp().whileTrue(mArm.setVoltageCommand(3));
 
-    mDriverController.povDown().whileTrue(mArm.setVoltageCommand(-3));
+    // mDriverController.povDown().whileTrue(mArm.setVoltageCommand(-3));
 
     mDriverController.b().whileTrue(mIntake.intakeTunablePivotToGoal());
 
@@ -98,7 +102,7 @@ public class ButtonBindings {
 
     // mDriverController.a().whileTrue(mArm.setPIDCmd(-30));
 
-    mDriverController.leftTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
+    // mDriverController.leftTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
     // mDriverController.leftTrigger().whileTrue(mTeleopCommands.get;
 
     mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
@@ -108,6 +112,14 @@ public class ButtonBindings {
     mDriverController.y().whileTrue(mArm.setTuneablePIDCmd());
     mDriverController.rightTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
     mDriverController.leftTrigger().whileTrue(mTeleopCommands.getScoreProcessorCmd());
+    mDriverController.povUp().whileTrue(mFlywheels.setAllVoltageCommand(
+      topFlywheel.Voltage.IntakeAlgae.getVoltage(),
+      bottomFlywheel.Voltage.IntakeAlgae.getVoltage(),
+      indexer.Voltage.IndexAlgae.getVoltage()));
+    mDriverController.povDown().whileTrue(mFlywheels.setAllVoltageCommand(
+      topFlywheel.Voltage.scoreProcessor.getVoltage(),
+      bottomFlywheel.Voltage.scoreProcessor.getVoltage(),
+      indexer.Voltage.scoreProcessor.getVoltage()));
     // mDriverController.y().whileTrue(
     //     mFlywheels.setTuneableRPM());
     // mDriverController.a().whileTrue(

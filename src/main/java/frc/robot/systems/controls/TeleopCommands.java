@@ -46,6 +46,10 @@ public class TeleopCommands {
             mIntake.setRollerVoltageCommand(Roller.Voltage.ScoreL1.getVoltage()));
   }
 
+  public Command getPrepL1Cmd() {
+    return mIntake.setIntakePivotCmd(Pivot.Setpoints.ScoreL1.getPos());
+  }
+
   public Command getIntakeFloorAlgaeCmd() {
     return new SequentialCommandGroup(
         mIntake.setIntakePivotCmd(Pivot.Setpoints.IntakeAlgae.getPos()),

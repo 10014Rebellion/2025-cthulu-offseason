@@ -62,7 +62,7 @@ public class IntakeConstants {
     public enum Setpoints {
       IntakeAlgae(26),
       IntakeCoral(-30),
-      Processor(30),
+      Processor(-25),
       AvoidArm(45),
       ScoreL1(60),
       StowIntake(60);
