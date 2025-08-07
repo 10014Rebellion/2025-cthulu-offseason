@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.1675,
+        "y": 5.195
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.1675,
+        "y": 5.195
+      },
+      "isLocked": false,
+      "linkedName": "A6F"
+    },
+    {
+      "anchor": {
+        "x": 6.7860000000000005,
+        "y": 6.0920000000000005
+      },
+      "prevControl": {
+        "x": 5.7860000000000005,
+        "y": 6.0920000000000005
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "ShootBB"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -29.47588900324579
+  },
+  "reversed": false,
+  "folder": "NorthPaths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 60.133083148487046
+  },
+  "useDefaultConstraints": true
+}
