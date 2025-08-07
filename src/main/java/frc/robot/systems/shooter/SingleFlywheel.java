@@ -56,6 +56,10 @@ public class SingleFlywheel extends SubsystemBase {
     motor.setVoltage(targetVoltage);
   }
 
+  public void stopMotor() {
+    motor.stopMotor();
+  }
+
   public double getCurrent() {
     return motor.getOutputCurrent();
   }

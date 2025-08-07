@@ -150,7 +150,7 @@ public class RobotContainer {
 
     mButtonBindings.initOperatorBindings();
 
-    mButtonBindings.initTestBindings();
+    // mButtonBindings.initTestBindings();
   }
 
   // private void configureTestBindings() {

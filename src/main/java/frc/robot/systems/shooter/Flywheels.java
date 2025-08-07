@@ -80,11 +80,17 @@ public class Flywheels extends SubsystemBase {
   }
 
   private void setTopFlywheelVoltage(double pDesiredVolts) {
-    mTopFlywheel.setVoltage(clampVoltage(pDesiredVolts));
+    if (pDesiredVolts != 0.0){
+      mTopFlywheel.setVoltage(clampVoltage(pDesiredVolts));
+    }
+    else mTopFlywheel.stopMotor();
   }
 
   private void setBottomFlywheelVoltage(double pDesiredVolts) {
-    mBottomFlywheel.setVoltage(clampVoltage(pDesiredVolts));
+    if (pDesiredVolts != 0.0){
+      mBottomFlywheel.setVoltage(clampVoltage(pDesiredVolts));
+    }
+    else mBottomFlywheel.stopMotor();
   }
 
   private void setIndexerVoltage(double pDesiredVolts) {
@@ -131,6 +137,8 @@ public class Flywheels extends SubsystemBase {
           setIndexerVoltage(indexerVolts);
         },
         (interrupted) -> {
+          setTopFlywheelVoltage(0);
+          setBottomFlywheelVoltage(0);
           setIndexerVoltage(0);
         },
         () -> false);
@@ -142,6 +150,22 @@ public class Flywheels extends SubsystemBase {
         () -> {
           setTopFlywheelVoltage(topFlywheel.Voltage.IntakeAlgae.getVoltage());
           setBottomFlywheelVoltage(bottomFlywheel.Voltage.IntakeAlgae.getVoltage());
+          setIndexerVoltage(indexer.Voltage.IndexAlgae.getVoltage());
+        },
+        (interrupted) -> {
+          setIndexerVoltage(indexer.Voltage.HoldAlgae.getVoltage());
+          setTopFlywheelVoltage(0.0);
+          setBottomFlywheelVoltage(0.0);
+        },
+        () -> getAlgaeDetected());
+  }
+
+  public FunctionalCommand intakeReefAlgaeCommand() {
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          setTopFlywheelVoltage(topFlywheel.Voltage.IntakeReef.getVoltage());
+          setBottomFlywheelVoltage(bottomFlywheel.Voltage.IntakeReef.getVoltage());
           setIndexerVoltage(indexer.Voltage.IndexAlgae.getVoltage());
         },
         (interrupted) -> {

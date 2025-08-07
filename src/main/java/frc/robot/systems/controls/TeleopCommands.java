@@ -94,7 +94,7 @@ public class TeleopCommands {
   public Command getIntakeL2AlgaeCmd() {
     return new SequentialCommandGroup(
         new ParallelDeadlineGroup(
-            mFlywheels.intakeAlgaeCommand(),
+            mFlywheels.intakeReefAlgaeCommand(),
             mArm.setPIDCmd(ArmConstants.Setpoints.L2Algae.getPos()),
             mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos())
         ),
@@ -105,7 +105,7 @@ public class TeleopCommands {
   public Command getIntakeL3AlgaeCmd() {
     return new SequentialCommandGroup(
         new ParallelDeadlineGroup(
-            mFlywheels.intakeAlgaeCommand(),
+            mFlywheels.intakeReefAlgaeCommand(),
             mArm.setPIDCmd(ArmConstants.Setpoints.L3Algae.getPos()),
             mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos())
         ),

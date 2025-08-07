@@ -26,7 +26,8 @@ public class FlywheelConstants {
     public static final SparkFlexConfig kMotorConfig = new SparkFlexConfig();
 
     public enum Voltage {
-      IntakeAlgae(-3),
+      IntakeAlgae(-6),
+      IntakeReef(-3),
       scoreProcessor(6),
       BasicShootAlgae(12);
 
@@ -67,7 +68,8 @@ public class FlywheelConstants {
     public static final SparkFlexConfig kMotorConfig = new SparkFlexConfig();
 
     public enum Voltage {
-      IntakeAlgae(-3),
+      IntakeAlgae(-6),
+      IntakeReef(-3),
       scoreProcessor(6),
       BasicShootAlgae(12);
 

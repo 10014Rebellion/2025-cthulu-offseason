@@ -73,9 +73,15 @@ public class ButtonBindings {
                     mDrive)
                 .ignoringDisable(true));
 
-    mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd());
+    mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
+    .onFalse(mIntake.setIntakePivotCmd(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()));
+    mDriverController.leftBumper().whileTrue(mTeleopCommands.getScoreL1Cmd());
 
     mDriverController.rightTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
+    mDriverController.leftTrigger().whileTrue(mFlywheels.setAllVoltageCommand(
+      topFlywheel.Voltage.scoreProcessor.getVoltage(),
+      bottomFlywheel.Voltage.scoreProcessor.getVoltage(),
+      indexer.Voltage.scoreProcessor.getVoltage()));
   }
   // All bindings for the operator should be here.
   public void initOperatorBindings() {
@@ -94,7 +100,7 @@ public class ButtonBindings {
 
     // mDriverController.povDown().whileTrue(mArm.setVoltageCommand(-3));
 
-    mDriverController.b().whileTrue(mIntake.intakeTunablePivotToGoal());
+    // mDriverController.b().whileTrue(mIntake.intakeTunablePivotToGoal());
 
     // mDriverController.y().whileTrue(mArm.setPIDCmd(45));
 
@@ -105,13 +111,13 @@ public class ButtonBindings {
     // mDriverController.leftTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
     // mDriverController.leftTrigger().whileTrue(mTeleopCommands.get;
 
-    mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
-    .onFalse(mIntake.setIntakePivotCmd(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()));
-    mDriverController.leftBumper().whileTrue(mTeleopCommands.getScoreL1Cmd());
+    // mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
+    // .onFalse(mIntake.setIntakePivotCmd(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()));
+    // mDriverController.leftBumper().whileTrue(mTeleopCommands.getScoreL1Cmd());
 
-    mDriverController.y().whileTrue(mArm.setTuneablePIDCmd());
-    mDriverController.rightTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
-    mDriverController.leftTrigger().whileTrue(mTeleopCommands.getScoreProcessorCmd());
+    // mDriverController.y().whileTrue(mArm.setTuneablePIDCmd());
+    // mDriverController.rightTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
+    // mDriverController.leftTrigger().whileTrue(mTeleopCommands.getScoreProcessorCmd());
     mDriverController.povUp().whileTrue(mFlywheels.setAllVoltageCommand(
       topFlywheel.Voltage.IntakeAlgae.getVoltage(),
       bottomFlywheel.Voltage.IntakeAlgae.getVoltage(),
