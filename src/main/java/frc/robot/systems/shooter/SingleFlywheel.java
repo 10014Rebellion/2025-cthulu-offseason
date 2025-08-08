@@ -45,7 +45,7 @@ public class SingleFlywheel extends SubsystemBase {
   }
 
   public boolean atSetpoint() {
-    return (Math.abs(targetVelo - getVelocity()) < 200 && targetVelo != 0);
+    return (Math.abs(targetVelo - getVelocity()) < FlywheelConstants.kTolerance && targetVelo != 0);
   }
 
   public double getVelocity() {

@@ -105,7 +105,8 @@ public class IntakeConstants {
       IntakeCoral(12),
       HoldCoral(1),
       ScoreProcessor(6),
-      ScoreL1(-12);
+      ScoreL1(-12),
+      SlowScoreL1(-1);// THIS SHOULD ONLY BE USED AS A FAILSAFE; 
 
       public final double voltage;
 

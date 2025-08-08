@@ -7,6 +7,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 public class FlywheelConstants {
   public static final double bottomMultipler = 0.7;
   public static final double topMultiplier = 1.0;
+  public static final double kTolerance = 200;
   public class topFlywheel {
     public static final int kMotorID = 32;
 

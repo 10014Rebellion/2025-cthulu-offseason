@@ -410,11 +410,8 @@ public class Drive extends SubsystemBase {
     double robotXDistanceToBarge = Math.abs(robotPose.getX() - FieldConstants.kBargeXPosition);
     double aimedDistanceToBarge = 0;
     double aimedYPosition = 0;
-
-    if (robotRotation.getCos() == 0) {
-      aimedDistanceToBarge = Math.abs(robotXDistanceToBarge);
-    }
-    else aimedDistanceToBarge = Math.abs(robotXDistanceToBarge * 1/robotRotation.getCos());
+    
+    aimedDistanceToBarge = Math.abs(robotXDistanceToBarge * 1/robotRotation.getCos());
     
     
 
@@ -422,7 +419,7 @@ public class Drive extends SubsystemBase {
       aimedYPosition = aimedDistanceToBarge * robotRotation.getSin() + robotPose.getY();
     }
     else {
-      aimedYPosition = -aimedDistanceToBarge * robotRotation.getSin() + robotPose.getY();
+      aimedYPosition = aimedDistanceToBarge * robotRotation.getSin() + robotPose.getY();
     }
 
     Pose2d bargeScoringPose = new Pose2d(FieldConstants.kBargeXPosition, aimedYPosition, robotPose.getRotation());

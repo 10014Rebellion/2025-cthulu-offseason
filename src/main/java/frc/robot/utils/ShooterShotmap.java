@@ -14,7 +14,8 @@ public class ShooterShotmap {
               "FAILED TO ADD DATAPOINT! Invalid array length in the shotmap! Expecting 3 parameters (distance, rpm, angle) but "
                   + iDataPoint.length
                   + " datapoints were given");
-        } else {
+        } 
+        else {
           map.put(Double.valueOf(iDataPoint[0]), new ShooterSetpoint(iDataPoint[1], iDataPoint[2]));
         }
       } catch (IllegalArgumentException e) {

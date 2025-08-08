@@ -12,6 +12,7 @@ import frc.robot.systems.arm.Arm;
 import frc.robot.systems.drive.Drive;
 import frc.robot.utils.ShooterSetpoint;
 import frc.robot.utils.ShooterShotmap;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class ShotmapManager extends SubsystemBase{
     private final double kTEMP_DISTANCE_M = 0;
@@ -31,27 +32,38 @@ public class ShotmapManager extends SubsystemBase{
         {1.1, 4200, 33} // GOOD FAILSAFE SETPOINT
     };
 
+    private InterpolatingDoubleTreeMap flywheelVelocityMap = new InterpolatingDoubleTreeMap();
+    private InterpolatingDoubleTreeMap shooterAngleMap = new InterpolatingDoubleTreeMap();
+
     private ShooterSetpoint mCurrentSetpoint;
 
     private final Arm mArm;
     private final Flywheels mFlywheels;
     private final Drive mDrive;
-    private final ShooterShotmap mShotmap;
+    //private final ShooterShotmap mShotmap;
 
     public ShotmapManager(Arm pArm, Flywheels pFlywheels, Drive pDrive) {
         this.mArm = pArm;
         this.mFlywheels = pFlywheels;
         this.mDrive = pDrive;
-        this.mShotmap = new ShooterShotmap(shotMapPoints);
+        //this.mShotmap = new ShooterShotmap(shotMapPoints);
+        instantiateMaps();
     }
 
-    private Command shootCommand() {
-        return
-            new ParallelCommandGroup(
-                mArm.setPIDCmd(getShooterSetpoint(kTEMP_DISTANCE_M).mAngle),
-                mFlywheels.setBothFlywheelsRPM(getShooterSetpoint(kTEMP_DISTANCE_M).mRPM)
-            );
+    private void instantiateMaps() {
+        for (double[] list : shotMapPoints) {
+            flywheelVelocityMap.put(list[0], list[1]);
+            shooterAngleMap.put(list[0], list[2]);
+        } 
     }
+
+    // private Command shootCommand() {
+    //     return
+    //         new ParallelCommandGroup(
+    //             mArm.setPIDCmd(getShooterSetpoint(kTEMP_DISTANCE_M).mAngle),
+    //             mFlywheels.setBothFlywheelsRPM(getShooterSetpoint(kTEMP_DISTANCE_M).mRPM)
+    //         );
+    // }
 
     public FunctionalCommand alignShooterCommand() {
         return new FunctionalCommand(
@@ -66,18 +78,18 @@ public class ShotmapManager extends SubsystemBase{
     }
 
     public ShooterSetpoint getShooterSetpoint(double pDistance){
-        return mShotmap.getSetpoints(pDistance);
+        return new ShooterSetpoint(flywheelVelocityMap.get(pDistance), shooterAngleMap.get(pDistance));
     }
 
     private void updateShooterSetpoint(double pDistance) {
-        this.mCurrentSetpoint = mShotmap.getSetpoints(pDistance);
+        this.mCurrentSetpoint = new ShooterSetpoint(flywheelVelocityMap.get(pDistance), shooterAngleMap.get(pDistance));
     }
 
     public void periodic() {
         updateShooterSetpoint(mDrive.getShotDistance());
         Logger.recordOutput("Shotmap/Arm Setpoint", mCurrentSetpoint.mAngle);
         Logger.recordOutput("Shotmap/Top Setpoint", mCurrentSetpoint.mRPM * FlywheelConstants.topMultiplier);
-        Logger.recordOutput("Shotmap/Bottom Setpoint", mCurrentSetpoint.mAngle * FlywheelConstants.bottomMultipler);
+        Logger.recordOutput("Shotmap/Bottom Setpoint", mCurrentSetpoint.mRPM * FlywheelConstants.bottomMultipler);
         //updateShooterSetpoint();
     }
 }

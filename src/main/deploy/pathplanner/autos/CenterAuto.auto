@@ -41,9 +41,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "F1F-A1F"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "F1F-A1F"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeAlgae"
+                }
+              }
+            ]
           }
         },
         {

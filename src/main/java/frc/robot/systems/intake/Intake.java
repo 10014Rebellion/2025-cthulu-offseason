@@ -235,6 +235,17 @@ public class Intake extends SubsystemBase {
     else this.slot = slot;
   }
 
+  public FunctionalCommand scoreCoralCmd() {
+    return new FunctionalCommand(
+        () -> {},
+        () -> setRollerVolts(Roller.Voltage.ScoreL1.getVoltage()),
+        (interrupted) -> {
+          if (!hasCoral()) setRollerVolts(0.0);
+          else setRollerVolts(Roller.Voltage.SlowScoreL1.getVoltage());
+        },
+        () -> !hasCoral());
+  }
+
 
   @Override
   public void periodic() {
