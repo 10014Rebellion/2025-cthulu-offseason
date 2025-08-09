@@ -154,6 +154,32 @@ public class Intake extends SubsystemBase {
         this);
   }
 
+  public FunctionalCommand setUnendingIntakePivotCmd(double pGoalDegrees) {
+    return new FunctionalCommand(
+        () -> {
+          mPivotController.reset(getPivotAngleDeg());
+          mPivotController.setGoal(pGoalDegrees);
+        },
+        () -> {
+
+        double PIDoutput = mPivotController.calculate(getPivotAngleDeg());
+        double FFoutput =
+            mPivotFeedforward.calculate(
+                Units.degreesToRadians(mPivotController.getSetpoint().position + CGoffset),
+                Units.degreesToRadians(mPivotController.getSetpoint().velocity));
+        setPivotVolts(PIDoutput + FFoutput);
+        Logger.recordOutput("Intake/Pivot/Full Output", PIDoutput + FFoutput);
+        Logger.recordOutput("Intake/Pivot/PID Output", PIDoutput);
+        Logger.recordOutput("Intake/Pivot/FF Output", FFoutput);},
+        (interrupted) ->
+            setPivotVolts(
+                mPivotFeedforward.calculate(
+                    Units.degreesToRadians(getPivotAngleDeg() + CGoffset),
+                    0.0)),
+        () -> false,
+        this);
+  }
+
   public FunctionalCommand intakeTunablePivotToGoal() {
     return new FunctionalCommand(
         () -> {

@@ -35,7 +35,7 @@ public class ShotmapManager extends SubsystemBase{
     private InterpolatingDoubleTreeMap flywheelVelocityMap = new InterpolatingDoubleTreeMap();
     private InterpolatingDoubleTreeMap shooterAngleMap = new InterpolatingDoubleTreeMap();
 
-    private ShooterSetpoint mCurrentSetpoint;
+    private ShooterSetpoint mCurrentSetpoint = new ShooterSetpoint(0.0, 0.0);
 
     private final Arm mArm;
     private final Flywheels mFlywheels;
@@ -65,11 +65,10 @@ public class ShotmapManager extends SubsystemBase{
     //         );
     // }
 
-    public FunctionalCommand alignShooterCommand() {
+    public FunctionalCommand setFlywheelCmd() {
         return new FunctionalCommand(
         () -> {}, 
         () -> {
-            mArm.setPIDCmd(mCurrentSetpoint.mAngle);
             mFlywheels.setBothRPM(mCurrentSetpoint.mRPM * FlywheelConstants.topMultiplier, 
             mCurrentSetpoint.mRPM * FlywheelConstants.bottomMultipler);
         }, 
@@ -77,8 +76,8 @@ public class ShotmapManager extends SubsystemBase{
         () -> false, this);
     }
 
-    public ShooterSetpoint getShooterSetpoint(double pDistance){
-        return new ShooterSetpoint(flywheelVelocityMap.get(pDistance), shooterAngleMap.get(pDistance));
+    public ShooterSetpoint getShooterSetpoint(){
+        return mCurrentSetpoint;
     }
 
     private void updateShooterSetpoint(double pDistance) {

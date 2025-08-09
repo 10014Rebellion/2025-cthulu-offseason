@@ -55,11 +55,11 @@ public class ButtonBindings {
             mDrive,
             () -> -mDriverController.getLeftY(),
             () -> -mDriverController.getLeftX(),
-            () -> mDriverController.getRightX()));
+            () -> -mDriverController.getRightX()));
   }
 
   public void initTriggers() {
-    new Trigger(() -> mDrive.canHitBarge())
+    new Trigger(() -> (mDrive.canHitBarge() && mArm.isPIDAtGoal() && mFlywheels.atSetpoint())).debounce(0.1)
       .whileTrue(new InstantCommand(() -> mLEDs.setSolid(ledColor.GREEN)))
       .whileFalse(new InstantCommand(() -> mLEDs.setDefaultColor()));
     
@@ -89,11 +89,12 @@ public class ButtonBindings {
     mDriverController
         .x()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        mDrive.setPose(
-                            new Pose2d(mDrive.getPose().getTranslation(), new Rotation2d())),
-                    mDrive)
+            new InstantCommand(() -> mDrive.resetGyro())
+            // Commands.runOnce(
+            //         () ->
+            //             mDrive.setPose(
+            //                 new Pose2d(mDrive.getPose().getTranslation(), new Rotation2d())),
+            //         mDrive)
                 .ignoringDisable(true));
 
     mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
@@ -124,56 +125,17 @@ public class ButtonBindings {
 
   // All bindings for running certain commands that aren't ready for "competition" use yet go here.
   public void initTestBindings() {
-    // mDriverController.b().whileTrue(mTeleopCommands.scoreProcessorCmd());
-
-    // mDriverController.povUp().whileTrue(mArm.setVoltageCommand(3));
-
-    // mDriverController.povDown().whileTrue(mArm.setVoltageCommand(-3));
-
-    // mDriverController.b().whileTrue(mIntake.intakeTunablePivotToGoal());
-
-    // mDriverController.y().whileTrue(mArm.setPIDCmd(45));
-
-    // mDriverController.x().whileTrue(mArm.setPIDCmd(0));
-
-    // mDriverController.a().whileTrue(mArm.setPIDCmd(-30));
-
-    // mDriverController.leftTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
-    // mDriverController.leftTrigger().whileTrue(mTeleopCommands.get;
-
-    // mDriverController.rightBumper().whileTrue(mTeleopCommands.getIntakeCoralCmd())
-    // .onFalse(mIntake.setIntakePivotCmd(IntakeConstants.Pivot.Setpoints.StowIntake.getPos()));
-    // mDriverController.leftBumper().whileTrue(mTeleopCommands.getScoreL1Cmd());
-
-    mDriverController.b().whileTrue(
-      new ParallelCommandGroup(mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos()),
-      mArm.setTuneablePIDCmd()));
-    // mDriverController.rightTrigger().whileTrue(mTeleopCommands.getIntakeFloorAlgaeCmd());
-    // mDriverController.leftTrigger().whileTrue(mTeleopCommands.getScoreProcessorCmd());
-    // mDriverController.povUp().whileTrue(mFlywheels.setAllVoltageCommand(
-    //   topFlywheel.Voltage.IntakeAlgae.getVoltage(),
-    //   bottomFlywheel.Voltage.IntakeAlgae.getVoltage(),
-    //   indexer.Voltage.IndexAlgae.getVoltage()));
     mDriverController.povUp().whileTrue(
-      mTeleopCommands.getIntakeFloorAlgaeCmd()
+      new InstantCommand(() -> mLEDs.setSolid(ledColor.YELLOW))
     );
-    mDriverController.povDown().whileTrue(mFlywheels.setAllVoltageCommand(
-      topFlywheel.Voltage.scoreProcessor.getVoltage(),
-      bottomFlywheel.Voltage.scoreProcessor.getVoltage(),
-      indexer.Voltage.scoreProcessor.getVoltage()));
-    mDriverController.rightTrigger().whileTrue(mFlywheels.setIndexerVoltageCommand(-12));
-    mDriverController.y().whileTrue(
-        mFlywheels.setTuneableRPM());
-    // mDriverController.a().whileTrue(
-    //   new ParallelCommandGroup(
-    //     mFlywheels.setTopFlywheelRPM(3000),
-    //     mFlywheels.setBottomFlywheelRPM(3000)
-    // ));
-    //mDriverController.b().whileTrue(mFlywheels.setBottomFlywheelRPM(6000));
-    // mDriverController.x().whileTrue(mIntake.intakePivotFF());
-    // mDriverController.y().whileTrue(mIntake.intakeTunablePivotToGoal());
-    // mDriverController.rightBumper().whileTrue(mIntake.intakeCoralCmd());
-    // mDriverController.leftBumper().whileTrue(mIntake.setRollerVoltageCommand(Roller.Voltage.ScoreL1.getVoltage()));
-    //mDriverController.a().whileTrue(mFlywheels.setBottomFlywheelRPM(3000));
+    mDriverController.povLeft().whileTrue(
+      new InstantCommand(() -> mLEDs.setSolid(ledColor.GREEN))
+    );
+    mDriverController.povDown().whileTrue(
+      new InstantCommand(() -> mLEDs.setSolid(ledColor.CYAN))
+    );
+    mDriverController.povRight().whileTrue(
+      new InstantCommand(() -> mLEDs.setSolid(ledColor.RED))
+    );
   }
 }

@@ -16,7 +16,7 @@ public class LEDSubsystem extends SubsystemBase {
 
   private final int kLEDLength = 30; // TUNE ME
 
-  private ledColor defaultColor = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ? ledColor.BLUE : ledColor.RED;
+  private ledColor defaultColor = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ? ledColor.RED : ledColor.BLUE;
 
   public LEDSubsystem() {
 
@@ -32,6 +32,7 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   public void setDefaultColor() {
+    defaultColor = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ? ledColor.RED : ledColor.BLUE;
     setSolid(defaultColor);
   }
 

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.489249999999999,
-        "y": 2.27
+        "x": 7.5,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.679064150591323,
-        "y": 2.1073021566360075
+        "x": 7.25,
+        "y": 4.0
       },
       "isLocked": false,
-      "linkedName": "F2F"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.15775,
-        "y": 2.815999999999999
+        "x": 6.5,
+        "y": 4.0
       },
       "prevControl": {
-        "x": 4.975700001826801,
-        "y": 2.987341174751248
+        "x": 6.75,
+        "y": 4.0
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "A2F"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -61.073574164746184
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "SouthPaths",
+  "folder": "TestPaths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -61.073574164746184
+    "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

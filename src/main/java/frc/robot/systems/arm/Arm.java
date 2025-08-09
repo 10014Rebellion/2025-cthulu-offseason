@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.utils.LoggedTunableNumber;
+
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
@@ -165,6 +168,33 @@ public class Arm extends SubsystemBase {
         },
         (interrupted) -> setVoltage(0),
         () -> isPIDAtGoal(),
+        this);
+  }
+
+  public FunctionalCommand setChangingPIDCmd(DoubleSupplier pSetpoint) {
+    return new FunctionalCommand(
+        () -> {
+          controller.reset(getPosistionDegrees());
+
+        },
+        () -> {
+          controller.setGoal(pSetpoint.getAsDouble());
+          trackedSetpoint = pSetpoint.getAsDouble();
+          double encoderReading = getPosistionDegrees();
+          double calculatedPID = controller.calculate(encoderReading);
+          double calculatedFF =
+              feedforward.calculate(
+                  Units.degreesToRadians(
+                      controller.getSetpoint().position + ArmConstants.kCGOffsetDeg),
+                  Units.degreesToRadians(controller.getSetpoint().velocity));
+
+          setVoltage(calculatedPID + calculatedFF);
+          Logger.recordOutput("Arm/Full Output", calculatedPID + calculatedFF);
+          Logger.recordOutput("Arm/PID Output", calculatedPID);
+          Logger.recordOutput("Arm/FF Output", calculatedFF);
+        },
+        (interrupted) -> setVoltage(0),
+        () -> false,
         this);
   }
 

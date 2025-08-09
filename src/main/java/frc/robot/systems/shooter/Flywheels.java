@@ -312,6 +312,10 @@ public class Flywheels extends SubsystemBase {
         () -> false);
   }
 
+  public boolean atSetpoint() {
+    return mBottomFlywheel.atSetpoint() && mTopFlywheel.atSetpoint();
+  }
+
   private double clampVoltage(double pVolts) {
     return MathUtil.clamp(pVolts, -Constants.kRobotVoltage, Constants.kRobotVoltage);
   }

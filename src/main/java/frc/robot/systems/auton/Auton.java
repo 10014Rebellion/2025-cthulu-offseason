@@ -80,10 +80,10 @@ public class Auton {
     public Command shootAlgaeCmd(){
         return 
         new SequentialCommandGroup(
-            new ParallelRaceGroup(
-                new WaitCommand(1.0),
-                mShotmapManager.alignShooterCommand()
-            ),
+            // new ParallelRaceGroup(
+            //     new WaitCommand(1.0),
+            //     mShotmapManager.alignShooterCommand()
+            // ),
             new ParallelRaceGroup(
                 new WaitCommand(0.5),
                 mFlywheels.setIndexerVoltageCommand(indexer.Voltage.FireAlgae.getVoltage())

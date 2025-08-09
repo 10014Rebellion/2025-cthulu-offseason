@@ -28,6 +28,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -107,7 +108,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(0.28, 0.0, 0.0), new PIDConstants(0.2, 0.0, 0.0)),
         ppConfig,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -466,5 +467,13 @@ public class Drive extends SubsystemBase {
   public boolean canHitBarge() {
     return canHitBarge;
   }
+
+  public void resetGyro() {
+        /* Robot is usually facing the other way(relative to field) when doing cycles on red side, so gyro is reset to 180 */
+        Rotation2d robotRotation = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get().equals(Alliance.Red) ? 
+            Rotation2d.fromDegrees(180.0) : Rotation2d.fromDegrees(0.0);
+        //gyroIO.yawPosition = robotRotation);
+        setPose(new Pose2d(new Translation2d(), robotRotation));
+    }
 
 }

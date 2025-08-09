@@ -48,10 +48,10 @@ public class DriveConstants {
 
   // NOTE: This is not being applied to the encoder or spark max, but as an additional offset
   // outside the controller.
-  public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0));
-  public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRadians((Math.PI));
-  public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0);
-  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRadians((3 * Math.PI / 2.0));
+  public static final Rotation2d frontLeftZeroRotation = Rotation2d.fromRadians((Math.PI / 2.0) + Math.PI);
+  public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRadians((Math.PI + Math.PI));
+  public static final Rotation2d backLeftZeroRotation = Rotation2d.fromRadians(0 + Math.PI);
+  public static final Rotation2d backRightZeroRotation = Rotation2d.fromRadians((3 * Math.PI / 2.0) + Math.PI);
 
   // Device CAN IDs
   public static final int pigeonCanId = 10;
@@ -70,7 +70,8 @@ public class DriveConstants {
   public static final int driveMotorCurrentLimit = 50;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.5);
   public static final double driveMotorReduction =
-      5.08; // Base kit Medium https://www.revrobotics.com/rev-21-3005/
+      4.29; // Extra High 2 https://www.revrobotics.com/rev-21-3005/
+      // This was 5.08 mr. taha nilfrooshan smh
   public static final DCMotor driveGearbox = DCMotor.getNEO(1);
 
   // Drive encoder configuration

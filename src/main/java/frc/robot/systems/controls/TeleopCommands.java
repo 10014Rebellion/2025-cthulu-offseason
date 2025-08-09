@@ -59,7 +59,7 @@ public class TeleopCommands {
         new ParallelDeadlineGroup(
             mFlywheels.intakeAlgaeCommand(),
             mArm.setPIDCmd(ArmConstants.Setpoints.Intake.getPos()),
-            mIntake.setIntakePivotCmd(Pivot.Setpoints.IntakeAlgae.getPos()),
+            mIntake.setUnendingIntakePivotCmd(Pivot.Setpoints.IntakeAlgae.getPos()),
             mIntake.setRollerVoltageCommand(
                 IntakeConstants.Roller.Voltage.IntakeAlgae.getVoltage())),
         mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos()),
@@ -119,7 +119,8 @@ public class TeleopCommands {
   public Command getPrepShooterCmd() {
     return new ParallelCommandGroup(
         mIntake.setIntakePivotCmd(Pivot.Setpoints.AvoidArm.getPos()),
-        mShotmapManager.alignShooterCommand()
+        mShotmapManager.setFlywheelCmd(),
+        mArm.setChangingPIDCmd(() -> mShotmapManager.getShooterSetpoint().mAngle)
     );
   }
 }

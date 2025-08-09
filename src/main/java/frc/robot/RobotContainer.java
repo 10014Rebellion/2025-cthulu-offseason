@@ -153,10 +153,11 @@ public class RobotContainer {
   private void configureButtonBindings() {
     mButtonBindings.initDriverJoysticks();
     mButtonBindings.initDriverButtons();
+    mButtonBindings.initTriggers();
 
     mButtonBindings.initOperatorBindings();
 
-    // mButtonBindings.initTestBindings();
+    mButtonBindings.initTestBindings();
   }
 
   // private void configureTestBindings() {
